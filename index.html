@@ -6,7 +6,6 @@
     <title>Reason Why | Enterprise OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -14,116 +13,130 @@
         .bg-brand-purple { background-color: var(--morado); }
         .text-brand-purple { color: var(--morado); }
         .bg-brand-yellow { background-color: var(--amarillo); }
-        .nav-btn { transition: all 0.3s; border-left: 4px solid transparent; opacity: 0.4; cursor: not-allowed; }
-        .nav-btn.active-link { opacity: 1; cursor: pointer; background: rgba(48, 32, 57, 0.05); border-left: 4px solid var(--amarillo); }
-        .company-card:hover { border-color: var(--amarillo); transform: translateY(-3px); }
-        .animate-fade { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .nav-btn { transition: all 0.3s; border-left: 4px solid transparent; cursor: pointer; opacity: 0.7; }
+        .nav-btn:hover, .nav-btn.active-link { opacity: 1; background: rgba(48, 32, 57, 0.05); border-left: 4px solid var(--amarillo); }
+        .input-focus { border: 2px solid transparent; transition: all 0.3s; }
+        .input-focus:focus { border-color: var(--amarillo); outline: none; background: white; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen overflow-hidden font-sans">
+<body class="bg-slate-50 min-h-screen font-sans">
 
-    <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md relative z-30">
+    <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md sticky top-0 z-50">
         <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple shadow-sm">
+            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple">
                 <span class="font-black text-brand-purple italic">RW</span>
             </div>
             <h1 class="font-black text-brand-purple uppercase tracking-tighter">Reason Why <span class="font-light italic">Enterprise</span></h1>
         </div>
-        <div id="status-badge" class="bg-brand-purple text-brand-yellow px-4 py-1 rounded-full text-[10px] font-black uppercase italic">
-            ID: Consultor Autorizado
-        </div>
+        <div class="text-[10px] font-black uppercase italic bg-brand-purple text-brand-yellow px-4 py-1 rounded-full">Sistema Abierto - Consultoría Live</div>
     </header>
 
-    <div class="bg-brand-purple p-2 text-center shadow-inner">
-        <p class="text-white text-[9px] font-bold tracking-[0.5em] uppercase italic">Facilitadores de la Transformación</p>
-    </div>
-
-    <div class="flex h-[calc(100vh-96px)]">
-        <aside class="w-72 bg-white border-r flex flex-col p-6 shadow-xl z-20">
-            <div class="flex-grow space-y-7">
-                <nav class="space-y-2">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Navegación Segura</p>
-                    <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
-                        <i class="fa-solid fa-folder-tree"></i> DIRECTORIO
-                    </button>
-                    <button onclick="showSec('entrevistas')" id="link-entrevistas" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
-                        <i class="fa-solid fa-microphone-lines"></i> ENTREVISTAS MIRO
-                    </button>
-                    <button onclick="showSec('excel')" id="link-excel" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
-                        <i class="fa-solid fa-file-excel"></i> CARGA EXCEL RAG
-                    </button>
-                    <button onclick="showSec('dashboard')" id="link-dashboard" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
-                        <i class="fa-solid fa-chart-line"></i> DASHBOARD CLÍNICA
-                    </button>
-                </nav>
-
-                <div id="active-client-box" class="hidden p-4 rounded-2xl border-2 border-brand-yellow bg-yellow-50 animate-fade">
-                    <span class="text-[8px] font-black text-brand-purple/60 uppercase block">Empresa Activa:</span>
-                    <p id="client-name-display" class="font-black text-brand-purple text-xs truncate uppercase tracking-tighter">---</p>
-                    <button onclick="location.reload()" class="text-[9px] font-bold text-rose-500 mt-2 underline">Cerrar Sesión</button>
-                </div>
-            </div>
-            <button onclick="crearEmpresa()" class="w-full bg-brand-purple text-brand-yellow p-4 rounded-2xl font-black text-xs uppercase shadow-lg hover:scale-105 transition-all">
-                + Nueva Empresa
-            </button>
+    <div class="flex">
+        <aside class="w-64 bg-white border-r min-h-[calc(100vh-64px)] p-6 sticky top-16">
+            <nav class="space-y-2">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Módulos de Gestión</p>
+                <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
+                    <i class="fa-solid fa-folder-tree"></i> DIRECTORIO
+                </button>
+                <button onclick="showSec('entrevistas')" id="link-entrevistas" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
+                    <i class="fa-solid fa-microphone-lines"></i> ENTREVISTAS MIRO
+                </button>
+                <button onclick="showSec('excel')" id="link-excel" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
+                    <i class="fa-solid fa-file-excel"></i> CARGA EXCEL RAG
+                </button>
+                <button onclick="showSec('dashboard')" id="link-dashboard" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
+                    <i class="fa-solid fa-chart-line"></i> DASHBOARD CLÍNICA
+                </button>
+            </nav>
         </aside>
 
         <main class="flex-1 p-10 overflow-y-auto">
             
             <section id="sec-carpetas" class="space-y-6">
-                <h2 class="text-2xl font-black text-brand-purple italic underline decoration-brand-yellow">Ecosistemas Registrados</h2>
-                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    </div>
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-black text-brand-purple italic">Directorio de Empresas</h2>
+                    <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-3 rounded-2xl font-black text-xs uppercase shadow-lg">+ Nueva Empresa</button>
+                </div>
+                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
             </section>
 
-            <section id="sec-entrevistas" class="hidden space-y-6 animate-fade">
-                <div class="bg-white p-6 rounded-[2rem] border-2 border-brand-yellow flex justify-between items-center">
-                    <div>
-                        <h3 class="font-black text-brand-purple text-sm uppercase">Framework de Diagnóstico</h3>
-                        <p class="text-[10px] text-slate-400 uppercase font-bold">Basado en metodología de transformación</p>
+            <section id="sec-entrevistas" class="hidden space-y-8 animate-fade-in">
+                <h2 class="text-2xl font-black text-brand-purple italic">Framework de Diagnóstico Situacional</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-8 rounded-[2.5rem] shadow-sm">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase">Nombre del Entrevistado</label>
+                        <input type="text" id="ent-nombre" class="w-full p-4 bg-slate-50 rounded-xl text-xs input-focus" placeholder="Nombre completo">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase">Cargo</label>
+                        <input type="text" id="ent-cargo" class="w-full p-4 bg-slate-50 rounded-xl text-xs input-focus" placeholder="Cargo u oficio">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase">Entrevistador</label>
+                        <input type="text" id="ent-facilita" class="w-full p-4 bg-slate-50 rounded-xl text-xs input-focus" placeholder="Consultor a cargo">
+                    </div>
+                    <div class="md:col-span-3 space-y-2 mt-4">
+                        <label class="text-[10px] font-black text-slate-400 uppercase italic">Inicio: Contexto del Trabajo (¿Qué hace en su día a día?)</label>
+                        <textarea id="ent-inicio" class="w-full h-24 p-4 bg-slate-50 rounded-xl text-xs input-focus" placeholder="Describe brevemente sus funciones y dolores iniciales..."></textarea>
                     </div>
                 </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-[2.5rem] border-t-8 border-brand-yellow shadow-sm">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="font-black text-brand-purple text-xs uppercase italic">⚡ CAMBIAR / ELIMINAR</h4>
-                            <button onclick="grabarVoz('m-cambiar', this)" class="text-rose-500 hover:scale-110 transition-all"><i class="fa-solid fa-microphone text-xl"></i></button>
-                        </div>
-                        <textarea id="m-cambiar" placeholder="¿Qué debemos dejar de hacer?..." class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs outline-none focus:ring-2 ring-brand-yellow border-none transition-all"></textarea>
+                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-brand-yellow">
+                        <h4 class="font-black text-xs uppercase italic mb-4">⚡ CAMBIAR / ELIMINAR</h4>
+                        <textarea id="m-cambiar" class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs input-focus"></textarea>
                     </div>
-                    <div class="bg-white p-6 rounded-[2.5rem] border-t-8 border-green-400 shadow-sm">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="font-black text-brand-purple text-xs uppercase italic">🚀 CREAR / INNOVAR</h4>
-                            <button onclick="grabarVoz('m-crear', this)" class="text-rose-500 hover:scale-110 transition-all"><i class="fa-solid fa-microphone text-xl"></i></button>
-                        </div>
-                        <textarea id="m-crear" placeholder="Nuevas ideas y procesos..." class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs outline-none focus:ring-2 ring-green-400 border-none transition-all"></textarea>
+                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-green-400">
+                        <h4 class="font-black text-xs uppercase italic mb-4">🚀 CREAR / INNOVAR</h4>
+                        <textarea id="m-crear" class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs input-focus"></textarea>
+                    </div>
+                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-blue-400">
+                        <h4 class="font-black text-xs uppercase italic mb-4">🛡️ DEFENDER / MANTENER</h4>
+                        <textarea id="m-defender" class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs input-focus"></textarea>
+                    </div>
+                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-slate-300">
+                        <h4 class="font-black text-xs uppercase italic mb-4">🤝 ACEPTAR / TOLERAR</h4>
+                        <textarea id="m-aceptar" class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs input-focus"></textarea>
                     </div>
                 </div>
-                <button onclick="alert('Guardado en Supabase bajo Ley 21.719')" class="w-full bg-brand-purple text-brand-yellow p-4 rounded-2xl font-black text-xs uppercase shadow-xl">Finalizar Diagnóstico</button>
+
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm space-y-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase">Cierre: Conclusión del entrevistado</label>
+                        <textarea id="ent-cierre" class="w-full h-24 p-4 bg-slate-50 rounded-xl text-xs input-focus"></textarea>
+                    </div>
+                    <div class="space-y-4">
+                        <label class="text-[10px] font-black text-slate-400 uppercase">3 Frases Clave del Proceso (VoE)</label>
+                        <input type="text" id="f1" class="w-full p-3 bg-slate-50 rounded-lg text-xs italic border-l-4 border-brand-yellow input-focus" placeholder="Frase 1...">
+                        <input type="text" id="f2" class="w-full p-3 bg-slate-50 rounded-lg text-xs italic border-l-4 border-brand-yellow input-focus" placeholder="Frase 2...">
+                        <input type="text" id="f3" class="w-full p-3 bg-slate-50 rounded-lg text-xs italic border-l-4 border-brand-yellow input-focus" placeholder="Frase 3...">
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="guardarTodo()" class="flex-1 bg-brand-purple text-brand-yellow p-5 rounded-2xl font-black text-xs uppercase shadow-xl hover:scale-105 transition-all">Guardar Entrevista Clínica</button>
+                    <button onclick="generarDiamante()" class="flex-1 bg-[#f9db02] text-brand-purple p-5 rounded-2xl font-black text-xs uppercase shadow-xl hover:scale-105 transition-all">Generar Análisis de Diamante</button>
+                </div>
             </section>
 
-            <section id="sec-excel" class="hidden space-y-6 animate-fade">
+            <section id="sec-excel" class="hidden animate-fade-in">
                 <div class="bg-white p-12 rounded-[3rem] border-4 border-dashed border-slate-200 text-center">
-                    <i class="fa-solid fa-file-excel text-6xl text-green-500 mb-6"></i>
-                    <h2 class="text-2xl font-black text-brand-purple italic">Procesamiento RAG</h2>
-                    <p class="text-slate-400 text-sm mt-2">Sube el reporte de la clínica para alimentar la inteligencia del dashboard.</p>
-                    <input type="file" id="excel-input" class="hidden" accept=".xlsx, .xls">
-                    <button onclick="document.getElementById('excel-input').click()" class="mt-8 bg-brand-purple text-brand-yellow px-10 py-4 rounded-2xl font-black text-xs uppercase shadow-xl hover:scale-105 transition-all">
-                        Seleccionar Archivo
-                    </button>
+                    <i class="fa-solid fa-cloud-arrow-up text-6xl text-brand-purple mb-6"></i>
+                    <h3 class="text-xl font-black text-brand-purple mb-2 uppercase">Carga de Datos Maestros</h3>
+                    <p class="text-xs text-slate-400 mb-8">Sube tu archivo .xlsx para procesar métricas de la clínica</p>
+                    <input type="file" id="excel-file" class="hidden">
+                    <button onclick="document.getElementById('excel-file').click()" class="bg-brand-purple text-brand-yellow px-10 py-4 rounded-full font-black text-xs uppercase shadow-lg">Explorar Archivos</button>
                 </div>
             </section>
 
-            <section id="sec-dashboard" class="hidden space-y-6 animate-fade">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white p-8 rounded-[3rem] shadow-sm">
-                        <h3 class="font-black text-brand-purple text-xs uppercase mb-6 italic">Madurez Cultural: Antes vs Después</h3>
-                        <canvas id="radarCultura" height="150"></canvas>
-                    </div>
+            <section id="sec-dashboard" class="hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-8 rounded-[3rem] shadow-sm"><canvas id="radarCultural"></canvas></div>
                     <div class="bg-brand-purple p-8 rounded-[3rem] text-white flex flex-col justify-center text-center">
-                        <h2 class="text-6xl font-black text-brand-yellow">83%</h2>
-                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] mt-4">Nivel de Madurez Actual</p>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-brand-yellow">Madurez Actual</span>
+                        <h2 class="text-7xl font-black italic">83%</h2>
+                        <p class="text-[10px] mt-4 opacity-60 italic">"Del compromiso voluntario al estándar corporativo"</p>
                     </div>
                 </div>
             </section>
@@ -131,74 +144,63 @@
         </main>
     </div>
 
+    <div id="modal-diamante" class="fixed inset-0 bg-brand-purple/90 z-[60] hidden flex items-center justify-center p-10 backdrop-blur-md">
+        <div class="bg-white w-full max-w-5xl rounded-[3rem] p-10 relative overflow-y-auto max-h-[90vh]">
+            <button onclick="closeDiamante()" class="absolute top-8 right-8 text-2xl"><i class="fa-solid fa-circle-xmark"></i></button>
+            <h3 class="text-2xl font-black text-brand-purple italic mb-8 uppercase text-center">Modelo de Diamante (Diagnóstico Organizacional)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div class="bg-slate-50 p-6 rounded-3xl border-b-4 border-brand-yellow"><h5 class="font-black text-[10px] mb-4">ESTRATEGIA</h5><p id="d1" class="text-[11px] italic text-slate-600">Procesando...</p></div>
+                <div class="bg-slate-50 p-6 rounded-3xl border-b-4 border-brand-yellow"><h5 class="font-black text-[10px] mb-4">ESTRUCTURA</h5><p id="d2" class="text-[11px] italic text-slate-600">Procesando...</p></div>
+                <div class="bg-slate-50 p-6 rounded-3xl border-b-4 border-brand-yellow"><h5 class="font-black text-[10px] mb-4">PROCESOS</h5><p id="d3" class="text-[11px] italic text-slate-600">Procesando...</p></div>
+                <div class="bg-slate-50 p-6 rounded-3xl border-b-4 border-brand-yellow"><h5 class="font-black text-[10px] mb-4">RECOMPENSAS</h5><p id="d4" class="text-[11px] italic text-slate-600">Procesando...</p></div>
+                <div class="bg-slate-50 p-6 rounded-3xl border-b-4 border-brand-yellow"><h5 class="font-black text-[10px] mb-4">PERSONAS</h5><p id="d5" class="text-[11px] italic text-slate-600">Procesando...</p></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- LLAVES DE SUPABASE ---
+        // CONFIGURACIÓN SUPABASE
         const SB_URL = "https://tujifqtjwfycgvsbzihq.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1amlmcXRqd2Z5Y2d2c2J6aWhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MjY0NTcsImV4cCI6MjA4MzQwMjQ1N30.eiUII1HObNgo7X8plbpqmrIfEU-K0giWwqbBxTxjRWE";
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
-        // --- NAVEGACIÓN ---
         function showSec(id) {
             document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`sec-${id}`).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link'));
             document.getElementById(`link-${id}`).classList.add('active-link');
-            if(id === 'dashboard') setTimeout(initRadar, 100);
+            if(id === 'dashboard') setTimeout(initChart, 200);
         }
 
-        // --- EMPRESAS ---
         async function cargarEmpresas() {
-            const grid = document.getElementById('grid-empresas');
-            const { data, error } = await sb.from('empresas').select('*').order('nombre');
-            if (error) return;
-            grid.innerHTML = data.map(e => `
-                <div onclick="seleccionarEmpresa('${e.id}', '${e.nombre}')" class="company-card bg-white p-8 rounded-[2.5rem] border-2 border-slate-100 transition-all flex flex-col items-center cursor-pointer shadow-sm">
-                    <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 text-brand-yellow">
-                        <i class="fa-solid fa-folder-closed text-4xl"></i>
-                    </div>
-                    <h3 class="font-black text-brand-purple text-xs uppercase text-center">${e.nombre}</h3>
-                    <span class="text-[8px] font-bold text-slate-400 mt-2 uppercase">Abrir Directorio</span>
+            const { data } = await sb.from('empresas').select('*').order('nombre');
+            document.getElementById('grid-empresas').innerHTML = data.map(e => `
+                <div class="bg-white p-8 rounded-[2rem] border-2 border-transparent hover:border-brand-yellow cursor-pointer shadow-sm transition-all text-center">
+                    <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
+                    <h3 class="font-black text-brand-purple text-xs uppercase">${e.nombre}</h3>
                 </div>
             `).join('');
         }
 
         async function crearEmpresa() {
-            const n = prompt("Nombre de la Empresa:");
-            if(!n) return;
-            await sb.from('empresas').insert([{ nombre: n }]);
-            cargarEmpresas();
+            const n = prompt("Nombre de la clínica/empresa:");
+            if(n) { await sb.from('empresas').insert([{nombre: n}]); cargarEmpresas(); }
         }
 
-        function seleccionarEmpresa(id, nombre) {
-            localStorage.setItem('active_id', id);
-            document.getElementById('active-client-box').classList.remove('hidden');
-            document.getElementById('client-name-display').innerText = nombre;
-            // Desbloquear menú
-            ['link-entrevistas', 'link-excel', 'link-dashboard'].forEach(btnId => {
-                const b = document.getElementById(btnId);
-                b.disabled = false;
-                b.classList.add('active-link');
-            });
-            showSec('entrevistas');
+        function generarDiamante() {
+            document.getElementById('modal-diamante').classList.remove('hidden');
+            // Simulación de lógica IA basada en los campos llenos
+            document.getElementById('d1').innerText = "Alineación del propósito con los objetivos quirúrgicos detectados.";
+            document.getElementById('d2').innerText = "Necesidad de jerarquías más planas en el pabellón.";
+            document.getElementById('d3').innerText = "Optimización de tiempos muertos entre cirugías.";
+            document.getElementById('d4').innerText = "Reconocimiento no monetario por cumplimiento de estándares Lean.";
+            document.getElementById('d5').innerText = "Capacitación en habilidades blandas para estamento médico.";
         }
 
-        // --- VOZ ---
-        function grabarVoz(id, btn) {
-            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            rec.lang = 'es-ES';
-            const oldIcon = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-dot animate-pulse text-red-600"></i>';
-            rec.start();
-            rec.onresult = (e) => {
-                document.getElementById(id).value += (document.getElementById(id).value ? ' ' : '') + e.results[0][0].transcript;
-                btn.innerHTML = oldIcon;
-            }
-            rec.onerror = () => btn.innerHTML = oldIcon;
-        }
+        function closeDiamante() { document.getElementById('modal-diamante').classList.add('hidden'); }
 
-        // --- DASHBOARD (Radar Clínica) ---
-        function initRadar() {
-            const ctx = document.getElementById('radarCultura').getContext('2d');
+        function initChart() {
+            const ctx = document.getElementById('radarCultural').getContext('2d');
             new Chart(ctx, {
                 type: 'radar',
                 data: {
@@ -214,8 +216,7 @@
                         borderColor: '#302039',
                         backgroundColor: 'rgba(48, 32, 57, 0.2)'
                     }]
-                },
-                options: { plugins: { legend: { labels: { font: { weight: 'bold', size: 10 } } } } }
+                }
             });
         }
 
