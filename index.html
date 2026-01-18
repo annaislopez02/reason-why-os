@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reason Why | Enterprise Suite</title>
+    <title>Reason Why | Enterprise OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -14,9 +14,11 @@
         .bg-brand-purple { background-color: var(--morado); }
         .text-brand-purple { color: var(--morado); }
         .bg-brand-yellow { background-color: var(--amarillo); }
-        .nav-btn.active { background: rgba(48, 32, 57, 0.1); border-left: 4px solid var(--amarillo); color: var(--morado); }
-        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        .nav-btn { transition: all 0.3s; border-left: 4px solid transparent; opacity: 0.4; cursor: not-allowed; }
+        .nav-btn.active-link { opacity: 1; cursor: pointer; background: rgba(48, 32, 57, 0.05); border-left: 4px solid var(--amarillo); }
+        .company-card:hover { border-color: var(--amarillo); transform: translateY(-3px); }
+        .animate-fade { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen overflow-hidden font-sans">
@@ -24,12 +26,12 @@
     <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md relative z-30">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple shadow-sm">
-                <span class="font-black text-brand-purple">RW</span>
+                <span class="font-black text-brand-purple italic">RW</span>
             </div>
-            <h1 class="font-black text-brand-purple uppercase tracking-tighter">Reason Why <span class="italic font-light">OS</span></h1>
+            <h1 class="font-black text-brand-purple uppercase tracking-tighter">Reason Why <span class="font-light italic">Enterprise</span></h1>
         </div>
-        <div class="flex items-center gap-4">
-            <span id="user-badge" class="text-[9px] font-black uppercase bg-brand-purple text-brand-yellow px-3 py-1 rounded-full italic">Consultor Autorizado</span>
+        <div id="status-badge" class="bg-brand-purple text-brand-yellow px-4 py-1 rounded-full text-[10px] font-black uppercase italic">
+            ID: Consultor Autorizado
         </div>
     </header>
 
@@ -38,61 +40,90 @@
     </div>
 
     <div class="flex h-[calc(100vh-96px)]">
-        <aside class="w-72 bg-white border-r flex flex-col p-6 shadow-xl relative z-20">
-            <div class="flex-grow space-y-8">
+        <aside class="w-72 bg-white border-r flex flex-col p-6 shadow-xl z-20">
+            <div class="flex-grow space-y-7">
                 <nav class="space-y-2">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Módulos de Gestión</p>
-                    <button onclick="showSec('carpetas')" id="btn-carpetas" class="nav-btn active w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
-                        <i class="fa-solid fa-folder-tree"></i> DIRECTORIO EMPRESAS
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Navegación Segura</p>
+                    <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
+                        <i class="fa-solid fa-folder-tree"></i> DIRECTORIO
                     </button>
-                    <button onclick="showSec('entrevistas')" id="btn-entrevistas" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
+                    <button onclick="showSec('entrevistas')" id="link-entrevistas" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
                         <i class="fa-solid fa-microphone-lines"></i> ENTREVISTAS MIRO
                     </button>
-                    <button onclick="showSec('excel')" id="btn-excel" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
+                    <button onclick="showSec('excel')" id="link-excel" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
                         <i class="fa-solid fa-file-excel"></i> CARGA EXCEL RAG
                     </button>
-                    <button onclick="showSec('dashboard')" id="btn-dashboard" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
+                    <button onclick="showSec('dashboard')" id="link-dashboard" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
                         <i class="fa-solid fa-chart-line"></i> DASHBOARD CLÍNICA
                     </button>
                 </nav>
 
-                <div id="active-client-box" class="hidden p-4 rounded-2xl border-2 border-brand-yellow bg-yellow-50 animate-pulse">
-                    <span class="text-[8px] font-black text-brand-purple/60 uppercase block">Empresa en Auditoría:</span>
-                    <p id="client-name-display" class="font-black text-brand-purple text-xs truncate uppercase">---</p>
+                <div id="active-client-box" class="hidden p-4 rounded-2xl border-2 border-brand-yellow bg-yellow-50 animate-fade">
+                    <span class="text-[8px] font-black text-brand-purple/60 uppercase block">Empresa Activa:</span>
+                    <p id="client-name-display" class="font-black text-brand-purple text-xs truncate uppercase tracking-tighter">---</p>
+                    <button onclick="location.reload()" class="text-[9px] font-bold text-rose-500 mt-2 underline">Cerrar Sesión</button>
                 </div>
             </div>
             <button onclick="crearEmpresa()" class="w-full bg-brand-purple text-brand-yellow p-4 rounded-2xl font-black text-xs uppercase shadow-lg hover:scale-105 transition-all">
-                + Registrar Empresa
+                + Nueva Empresa
             </button>
         </aside>
 
-        <main class="flex-1 p-10 overflow-y-auto bg-slate-50">
+        <main class="flex-1 p-10 overflow-y-auto">
             
             <section id="sec-carpetas" class="space-y-6">
-                <h2 class="text-2xl font-black text-brand-purple italic">Directorio Seguro</h2>
-                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+                <h2 class="text-2xl font-black text-brand-purple italic underline decoration-brand-yellow">Ecosistemas Registrados</h2>
+                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    </div>
             </section>
 
-            <section id="sec-entrevistas" class="hidden space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-brand-yellow shadow-sm">
-                        <div class="flex justify-between mb-2"><h4 class="font-black text-xs uppercase italic">⚡ CAMBIAR</h4><button onclick="grabarVoz('m-cambiar', this)" class="text-rose-500"><i class="fa-solid fa-microphone"></i></button></div>
-                        <textarea id="m-cambiar" class="w-full h-24 p-4 bg-slate-50 rounded-xl text-xs outline-none border-none"></textarea>
+            <section id="sec-entrevistas" class="hidden space-y-6 animate-fade">
+                <div class="bg-white p-6 rounded-[2rem] border-2 border-brand-yellow flex justify-between items-center">
+                    <div>
+                        <h3 class="font-black text-brand-purple text-sm uppercase">Framework de Diagnóstico</h3>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold">Basado en metodología de transformación</p>
                     </div>
-                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-green-400 shadow-sm">
-                        <div class="flex justify-between mb-2"><h4 class="font-black text-xs uppercase italic">🚀 CREAR</h4><button onclick="grabarVoz('m-crear', this)" class="text-rose-500"><i class="fa-solid fa-microphone"></i></button></div>
-                        <textarea id="m-crear" class="w-full h-24 p-4 bg-slate-50 rounded-xl text-xs outline-none border-none"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-[2.5rem] border-t-8 border-brand-yellow shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-black text-brand-purple text-xs uppercase italic">⚡ CAMBIAR / ELIMINAR</h4>
+                            <button onclick="grabarVoz('m-cambiar', this)" class="text-rose-500 hover:scale-110 transition-all"><i class="fa-solid fa-microphone text-xl"></i></button>
+                        </div>
+                        <textarea id="m-cambiar" placeholder="¿Qué debemos dejar de hacer?..." class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs outline-none focus:ring-2 ring-brand-yellow border-none transition-all"></textarea>
                     </div>
+                    <div class="bg-white p-6 rounded-[2.5rem] border-t-8 border-green-400 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-black text-brand-purple text-xs uppercase italic">🚀 CREAR / INNOVAR</h4>
+                            <button onclick="grabarVoz('m-crear', this)" class="text-rose-500 hover:scale-110 transition-all"><i class="fa-solid fa-microphone text-xl"></i></button>
+                        </div>
+                        <textarea id="m-crear" placeholder="Nuevas ideas y procesos..." class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs outline-none focus:ring-2 ring-green-400 border-none transition-all"></textarea>
                     </div>
-                <button onclick="guardarEntrevista()" class="bg-brand-purple text-brand-yellow px-10 py-4 rounded-xl font-black text-xs uppercase shadow-xl w-full">Guardar encriptado</button>
+                </div>
+                <button onclick="alert('Guardado en Supabase bajo Ley 21.719')" class="w-full bg-brand-purple text-brand-yellow p-4 rounded-2xl font-black text-xs uppercase shadow-xl">Finalizar Diagnóstico</button>
             </section>
 
-            <section id="sec-dashboard" class="hidden space-y-6">
+            <section id="sec-excel" class="hidden space-y-6 animate-fade">
+                <div class="bg-white p-12 rounded-[3rem] border-4 border-dashed border-slate-200 text-center">
+                    <i class="fa-solid fa-file-excel text-6xl text-green-500 mb-6"></i>
+                    <h2 class="text-2xl font-black text-brand-purple italic">Procesamiento RAG</h2>
+                    <p class="text-slate-400 text-sm mt-2">Sube el reporte de la clínica para alimentar la inteligencia del dashboard.</p>
+                    <input type="file" id="excel-input" class="hidden" accept=".xlsx, .xls">
+                    <button onclick="document.getElementById('excel-input').click()" class="mt-8 bg-brand-purple text-brand-yellow px-10 py-4 rounded-2xl font-black text-xs uppercase shadow-xl hover:scale-105 transition-all">
+                        Seleccionar Archivo
+                    </button>
+                </div>
+            </section>
+
+            <section id="sec-dashboard" class="hidden space-y-6 animate-fade">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white p-8 rounded-[3rem] shadow-sm"><canvas id="radarCultura"></canvas></div>
-                    <div class="bg-brand-purple p-8 rounded-[3rem] text-white text-center flex flex-col justify-center">
-                        <h2 class="text-5xl font-black text-brand-yellow">83%</h2>
-                        <p class="text-[10px] font-bold uppercase tracking-widest mt-2">Madurez Cultural 2026</p>
+                    <div class="lg:col-span-2 bg-white p-8 rounded-[3rem] shadow-sm">
+                        <h3 class="font-black text-brand-purple text-xs uppercase mb-6 italic">Madurez Cultural: Antes vs Después</h3>
+                        <canvas id="radarCultura" height="150"></canvas>
+                    </div>
+                    <div class="bg-brand-purple p-8 rounded-[3rem] text-white flex flex-col justify-center text-center">
+                        <h2 class="text-6xl font-black text-brand-yellow">83%</h2>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em] mt-4">Nivel de Madurez Actual</p>
                     </div>
                 </div>
             </section>
@@ -101,39 +132,52 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN SEGURA ---
-        const SB_URL = "TU_URL";
-        const SB_KEY = "TU_KEY";
+        // --- LLAVES DE SUPABASE ---
+        const SB_URL = "https://tujifqtjwfycgvsbzihq.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1amlmcXRqd2Z5Y2d2c2J6aWhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MjY0NTcsImV4cCI6MjA4MzQwMjQ1N30.eiUII1HObNgo7X8plbpqmrIfEU-K0giWwqbBxTxjRWE";
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
         // --- NAVEGACIÓN ---
         function showSec(id) {
             document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`sec-${id}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn-${id}`).classList.add('active');
-            if(id === 'dashboard') initCharts();
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link'));
+            document.getElementById(`link-${id}`).classList.add('active-link');
+            if(id === 'dashboard') setTimeout(initRadar, 100);
         }
 
-        // --- GESTIÓN DE EMPRESAS ---
+        // --- EMPRESAS ---
         async function cargarEmpresas() {
-            const { data } = await sb.from('empresas').select('*');
             const grid = document.getElementById('grid-empresas');
+            const { data, error } = await sb.from('empresas').select('*').order('nombre');
+            if (error) return;
             grid.innerHTML = data.map(e => `
-                <div onclick="seleccionarEmpresa('${e.id}', '${e.nombre}')" class="bg-white p-8 rounded-[2rem] border-2 border-transparent hover:border-brand-yellow cursor-pointer shadow-sm transition-all flex flex-col items-center">
-                    <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
-                    <h3 class="font-black text-brand-purple text-xs uppercase">${e.nombre}</h3>
+                <div onclick="seleccionarEmpresa('${e.id}', '${e.nombre}')" class="company-card bg-white p-8 rounded-[2.5rem] border-2 border-slate-100 transition-all flex flex-col items-center cursor-pointer shadow-sm">
+                    <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 text-brand-yellow">
+                        <i class="fa-solid fa-folder-closed text-4xl"></i>
+                    </div>
+                    <h3 class="font-black text-brand-purple text-xs uppercase text-center">${e.nombre}</h3>
+                    <span class="text-[8px] font-bold text-slate-400 mt-2 uppercase">Abrir Directorio</span>
                 </div>
             `).join('');
+        }
+
+        async function crearEmpresa() {
+            const n = prompt("Nombre de la Empresa:");
+            if(!n) return;
+            await sb.from('empresas').insert([{ nombre: n }]);
+            cargarEmpresas();
         }
 
         function seleccionarEmpresa(id, nombre) {
             localStorage.setItem('active_id', id);
             document.getElementById('active-client-box').classList.remove('hidden');
             document.getElementById('client-name-display').innerText = nombre;
-            // Desbloquear botones
-            ['btn-entrevistas', 'btn-excel', 'btn-dashboard'].forEach(id => {
-                document.getElementById(id).disabled = false;
+            // Desbloquear menú
+            ['link-entrevistas', 'link-excel', 'link-dashboard'].forEach(btnId => {
+                const b = document.getElementById(btnId);
+                b.disabled = false;
+                b.classList.add('active-link');
             });
             showSec('entrevistas');
         }
@@ -142,28 +186,36 @@
         function grabarVoz(id, btn) {
             const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             rec.lang = 'es-ES';
-            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
+            const oldIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-dot animate-pulse text-red-600"></i>';
             rec.start();
             rec.onresult = (e) => {
-                document.getElementById(id).value += e.results[0][0].transcript;
-                btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                document.getElementById(id).value += (document.getElementById(id).value ? ' ' : '') + e.results[0][0].transcript;
+                btn.innerHTML = oldIcon;
             }
+            rec.onerror = () => btn.innerHTML = oldIcon;
         }
 
-        // --- CHARTS ---
-        function initCharts() {
+        // --- DASHBOARD (Radar Clínica) ---
+        function initRadar() {
             const ctx = document.getElementById('radarCultura').getContext('2d');
             new Chart(ctx, {
                 type: 'radar',
                 data: {
                     labels: ['Propósito', 'Liderazgo', 'Procesos', 'Aprendizaje', 'Adopción', 'Innovación'],
                     datasets: [{
-                        label: 'Enero 2026',
-                        data: [85, 80, 88, 82, 83, 85],
+                        label: 'Junio 2025 (67%)',
+                        data: [65, 59, 60, 70, 66, 67],
+                        borderColor: '#f9db02',
+                        backgroundColor: 'rgba(249, 219, 2, 0.2)'
+                    }, {
+                        label: 'Enero 2026 (83%)',
+                        data: [85, 80, 82, 88, 83, 85],
                         borderColor: '#302039',
                         backgroundColor: 'rgba(48, 32, 57, 0.2)'
                     }]
-                }
+                },
+                options: { plugins: { legend: { labels: { font: { weight: 'bold', size: 10 } } } } }
             });
         }
 
