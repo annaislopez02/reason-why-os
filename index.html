@@ -2,123 +2,169 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reason Why | Enterprise Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .company-card:hover { transform: translateY(-5px); border-color: #f9db02; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .bg-brand-purple { background-color: #302039; }
-        .text-brand-purple { color: #302039; }
-        .bg-brand-yellow { background-color: #f9db02; }
+        :root { --morado: #302039; --amarillo: #f9db02; }
+        .bg-brand-purple { background-color: var(--morado); }
+        .text-brand-purple { color: var(--morado); }
+        .bg-brand-yellow { background-color: var(--amarillo); }
+        .nav-btn.active { background: rgba(48, 32, 57, 0.1); border-left: 4px solid var(--amarillo); color: var(--morado); }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="bg-slate-50 min-h-screen overflow-hidden font-sans">
 
-    <div class="bg-brand-yellow p-2 px-6 flex items-center justify-between shadow-sm">
+    <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md relative z-30">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple overflow-hidden">
-                <span class="font-black text-brand-purple text-xl italic">RW</span>
+            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple shadow-sm">
+                <span class="font-black text-brand-purple">RW</span>
             </div>
-            <span class="font-black text-brand-purple uppercase tracking-tighter">Reason <span class="italic">Why</span></span>
+            <h1 class="font-black text-brand-purple uppercase tracking-tighter">Reason Why <span class="italic font-light">OS</span></h1>
         </div>
-        <button onclick="crearNuevaEmpresa()" class="bg-brand-purple text-brand-yellow px-4 py-2 rounded-lg font-black text-xs uppercase hover:scale-105 transition-all">
-            + Nuevo Cliente
-        </button>
+        <div class="flex items-center gap-4">
+            <span id="user-badge" class="text-[9px] font-black uppercase bg-brand-purple text-brand-yellow px-3 py-1 rounded-full italic">Consultor Autorizado</span>
+        </div>
+    </header>
+
+    <div class="bg-brand-purple p-2 text-center shadow-inner">
+        <p class="text-white text-[9px] font-bold tracking-[0.5em] uppercase italic">Facilitadores de la Transformación</p>
     </div>
 
-    <div class="bg-brand-purple p-4 px-8 shadow-lg">
-        <h2 class="text-white font-bold text-sm tracking-[0.3em] uppercase italic">Facilitadores de la Transformación</h2>
-    </div>
+    <div class="flex h-[calc(100vh-96px)]">
+        <aside class="w-72 bg-white border-r flex flex-col p-6 shadow-xl relative z-20">
+            <div class="flex-grow space-y-8">
+                <nav class="space-y-2">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Módulos de Gestión</p>
+                    <button onclick="showSec('carpetas')" id="btn-carpetas" class="nav-btn active w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
+                        <i class="fa-solid fa-folder-tree"></i> DIRECTORIO EMPRESAS
+                    </button>
+                    <button onclick="showSec('entrevistas')" id="btn-entrevistas" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
+                        <i class="fa-solid fa-microphone-lines"></i> ENTREVISTAS MIRO
+                    </button>
+                    <button onclick="showSec('excel')" id="btn-excel" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
+                        <i class="fa-solid fa-file-excel"></i> CARGA EXCEL RAG
+                    </button>
+                    <button onclick="showSec('dashboard')" id="btn-dashboard" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4" disabled>
+                        <i class="fa-solid fa-chart-line"></i> DASHBOARD CLÍNICA
+                    </button>
+                </nav>
 
-    <div class="flex">
-        <aside class="w-64 bg-white border-r h-[calc(100vh-120px)] p-6 space-y-6">
-            <nav class="space-y-2">
-                <button onclick="location.reload()" class="w-full text-left p-3 rounded-xl bg-slate-100 font-bold text-brand-purple text-xs flex items-center gap-3">
-                    <i class="fa-solid fa-home"></i> INICIO / CARPETAS
-                </button>
-                <div id="active-client-nav" class="hidden p-3 rounded-xl border-2 border-brand-yellow bg-yellow-50">
-                    <p class="text-[10px] font-black text-brand-purple uppercase italic">Cliente Activo:</p>
-                    <p id="client-name-display" class="text-xs font-bold text-brand-purple truncate">---</p>
+                <div id="active-client-box" class="hidden p-4 rounded-2xl border-2 border-brand-yellow bg-yellow-50 animate-pulse">
+                    <span class="text-[8px] font-black text-brand-purple/60 uppercase block">Empresa en Auditoría:</span>
+                    <p id="client-name-display" class="font-black text-brand-purple text-xs truncate uppercase">---</p>
                 </div>
-            </nav>
+            </div>
+            <button onclick="crearEmpresa()" class="w-full bg-brand-purple text-brand-yellow p-4 rounded-2xl font-black text-xs uppercase shadow-lg hover:scale-105 transition-all">
+                + Registrar Empresa
+            </button>
         </aside>
 
-        <main class="flex-1 p-10 h-[calc(100vh-120px)] overflow-y-auto">
+        <main class="flex-1 p-10 overflow-y-auto bg-slate-50">
             
-            <section id="sec-carpetas">
-                <div class="mb-8">
-                    <h3 class="text-2xl font-black text-brand-purple">Directorio de Empresas</h3>
-                    <p class="text-slate-400 text-sm italic">Seleccione una carpeta para gestionar hallazgos y RAG.</p>
-                </div>
+            <section id="sec-carpetas" class="space-y-6">
+                <h2 class="text-2xl font-black text-brand-purple italic">Directorio Seguro</h2>
+                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+            </section>
 
-                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <section id="sec-entrevistas" class="hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-brand-yellow shadow-sm">
+                        <div class="flex justify-between mb-2"><h4 class="font-black text-xs uppercase italic">⚡ CAMBIAR</h4><button onclick="grabarVoz('m-cambiar', this)" class="text-rose-500"><i class="fa-solid fa-microphone"></i></button></div>
+                        <textarea id="m-cambiar" class="w-full h-24 p-4 bg-slate-50 rounded-xl text-xs outline-none border-none"></textarea>
                     </div>
+                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-green-400 shadow-sm">
+                        <div class="flex justify-between mb-2"><h4 class="font-black text-xs uppercase italic">🚀 CREAR</h4><button onclick="grabarVoz('m-crear', this)" class="text-rose-500"><i class="fa-solid fa-microphone"></i></button></div>
+                        <textarea id="m-crear" class="w-full h-24 p-4 bg-slate-50 rounded-xl text-xs outline-none border-none"></textarea>
+                    </div>
+                    </div>
+                <button onclick="guardarEntrevista()" class="bg-brand-purple text-brand-yellow px-10 py-4 rounded-xl font-black text-xs uppercase shadow-xl w-full">Guardar encriptado</button>
+            </section>
+
+            <section id="sec-dashboard" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-8 rounded-[3rem] shadow-sm"><canvas id="radarCultura"></canvas></div>
+                    <div class="bg-brand-purple p-8 rounded-[3rem] text-white text-center flex flex-col justify-center">
+                        <h2 class="text-5xl font-black text-brand-yellow">83%</h2>
+                        <p class="text-[10px] font-bold uppercase tracking-widest mt-2">Madurez Cultural 2026</p>
+                    </div>
+                </div>
             </section>
 
         </main>
     </div>
 
     <script>
-        // CONFIGURACIÓN SUPABASE
-        const SB_URL = "TU_URL_AQUÍ";
-        const SB_KEY = "TU_KEY_AQUÍ";
+        // --- CONFIGURACIÓN SEGURA ---
+        const SB_URL = "TU_URL";
+        const SB_KEY = "TU_KEY";
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
-        // 1. CARGAR EMPRESAS AL INICIAR
+        // --- NAVEGACIÓN ---
+        function showSec(id) {
+            document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`sec-${id}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${id}`).classList.add('active');
+            if(id === 'dashboard') initCharts();
+        }
+
+        // --- GESTIÓN DE EMPRESAS ---
         async function cargarEmpresas() {
+            const { data } = await sb.from('empresas').select('*');
             const grid = document.getElementById('grid-empresas');
-            grid.innerHTML = '<p class="text-xs font-bold text-slate-400 animate-pulse">Sincronizando con base de datos...</p>';
-
-            const { data: empresas, error } = await sb
-                .from('empresas')
-                .select('*')
-                .order('nombre', { ascending: true });
-
-            if (error) {
-                grid.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
-                return;
-            }
-
-            grid.innerHTML = ''; 
-            empresas.forEach(emp => {
-                grid.innerHTML += `
-                    <div onclick="seleccionarEmpresa('${emp.id}', '${emp.nombre}')" 
-                         class="company-card bg-white border-2 border-slate-100 p-8 rounded-[2rem] transition-all flex flex-col items-center cursor-pointer shadow-sm">
-                        <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
-                            <i class="fa-solid fa-folder text-brand-yellow text-4xl"></i>
-                        </div>
-                        <h4 class="font-black text-brand-purple text-xs uppercase text-center leading-tight">${emp.nombre}</h4>
-                        <span class="text-[9px] text-slate-400 mt-2 font-bold uppercase italic">Ver Archivos</span>
-                    </div>
-                `;
-            });
+            grid.innerHTML = data.map(e => `
+                <div onclick="seleccionarEmpresa('${e.id}', '${e.nombre}')" class="bg-white p-8 rounded-[2rem] border-2 border-transparent hover:border-brand-yellow cursor-pointer shadow-sm transition-all flex flex-col items-center">
+                    <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
+                    <h3 class="font-black text-brand-purple text-xs uppercase">${e.nombre}</h3>
+                </div>
+            `).join('');
         }
 
-        // 2. CREAR NUEVA EMPRESA
-        async function crearNuevaEmpresa() {
-            const nombre = prompt("Nombre de la Empresa:");
-            if (!nombre) return;
-            const rut = prompt("RUT Empresa (Ley 21.719):");
-
-            const { data, error } = await sb
-                .from('empresas')
-                .insert([{ nombre, rut_empresa: rut }]);
-
-            if (error) {
-                alert("Error al crear: " + error.message);
-            } else {
-                cargarEmpresas();
-            }
-        }
-
-        // 3. SELECCIONAR EMPRESA
         function seleccionarEmpresa(id, nombre) {
-            localStorage.setItem('cliente_id', id);
-            document.getElementById('active-client-nav').classList.remove('hidden');
+            localStorage.setItem('active_id', id);
+            document.getElementById('active-client-box').classList.remove('hidden');
             document.getElementById('client-name-display').innerText = nombre;
-            alert("Has entrado a la carpeta de: " + nombre);
-            // Aquí luego activaremos el cambio de vista al Dashboard
+            // Desbloquear botones
+            ['btn-entrevistas', 'btn-excel', 'btn-dashboard'].forEach(id => {
+                document.getElementById(id).disabled = false;
+            });
+            showSec('entrevistas');
+        }
+
+        // --- VOZ ---
+        function grabarVoz(id, btn) {
+            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            rec.lang = 'es-ES';
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
+            rec.start();
+            rec.onresult = (e) => {
+                document.getElementById(id).value += e.results[0][0].transcript;
+                btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+            }
+        }
+
+        // --- CHARTS ---
+        function initCharts() {
+            const ctx = document.getElementById('radarCultura').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Propósito', 'Liderazgo', 'Procesos', 'Aprendizaje', 'Adopción', 'Innovación'],
+                    datasets: [{
+                        label: 'Enero 2026',
+                        data: [85, 80, 88, 82, 83, 85],
+                        borderColor: '#302039',
+                        backgroundColor: 'rgba(48, 32, 57, 0.2)'
+                    }]
+                }
+            });
         }
 
         window.onload = cargarEmpresas;
