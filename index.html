@@ -17,10 +17,19 @@
         .nav-btn:hover, .nav-btn.active-link { opacity: 1; background: rgba(48, 32, 57, 0.05); border-left: 4px solid var(--amarillo); }
         .form-input { width: 100%; padding: 0.8rem; border-radius: 1rem; border: 2px solid #f1f5f9; outline: none; font-size: 0.8rem; background: #fafbfc; }
         .form-input:focus { border-color: var(--amarillo); background: white; }
-        /* Estilo para los cuadrantes tipo Miro */
-        .miro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; position: relative; }
-        .diamond-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 180px; height: 180px; background: white; border: 4px solid #e2e8f0; rotate: 45deg; display: flex; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-        .diamond-content { rotate: -45deg; text-align: center; font-size: 10px; font-weight: 800; color: var(--morado); padding: 10px; text-transform: uppercase; }
+        
+        /* Layout Miro */
+        .miro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; position: relative; padding: 20px; }
+        .diamond-center { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            width: 160px; height: 160px; background: white; border: 3px solid #e2e8f0; 
+            rotate: 45deg; display: flex; align-items: center; justify-content: center; z-index: 50;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .diamond-content { rotate: -45deg; text-align: center; font-size: 9px; font-weight: 900; color: var(--morado); width: 100px; }
+        .rec-mini { font-size: 10px; padding: 4px 10px; border-radius: 8px; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+        .is-recording { background: #ef4444 !important; color: white !important; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -61,62 +70,76 @@
 
                 <section id="sec-entrevista" class="content-sec hidden">
                     <div class="max-w-6xl mx-auto space-y-6">
-                        <div class="flex justify-between items-center bg-white p-6 rounded-[2rem] border shadow-sm">
-                            <div class="flex gap-4 items-center">
-                                <select id="entrevista-empresa" class="form-input w-64"></select>
-                                <input type="text" id="miro-nombre" class="form-input w-64" placeholder="Nombre del Entrevistado">
-                            </div>
-                            <button id="record-btn" onclick="toggleRecording()" class="bg-red-500 text-white px-6 py-3 rounded-full font-black text-[10px] uppercase flex items-center gap-2">
-                                <i class="fa-solid fa-microphone"></i> Grabar Audio
-                            </button>
+                        <div class="flex gap-4 bg-white p-6 rounded-[2rem] border shadow-sm">
+                            <select id="entrevista-empresa" class="form-input w-64"></select>
+                            <input type="text" id="miro-nombre" class="form-input flex-1" placeholder="Nombre del Entrevistado / Cargo">
                         </div>
 
                         <div class="miro-grid">
                             <div class="diamond-center">
-                                <div class="diamond-content text-center">
-                                    <span class="block mb-1 opacity-50">Análisis Central</span>
-                                    <textarea id="miro-analisis-central" class="w-full h-full bg-transparent border-none focus:ring-0 text-center font-black uppercase text-[10px]" placeholder="Escribe el hallazgo clave aquí..."></textarea>
+                                <div class="diamond-content">
+                                    <span class="block opacity-40 mb-1">HALLAZGO</span>
+                                    <textarea id="miro-analisis-central" class="w-full bg-transparent border-none text-center font-black uppercase text-[10px] focus:ring-0 p-0" placeholder="Escribe aquí..."></textarea>
+                                    <button onclick="toggleRecArea('central')" id="btn-rec-central" class="rec-mini bg-slate-100 mx-auto mt-1"><i class="fa-solid fa-microphone"></i></button>
                                 </div>
                             </div>
 
-                            <div class="bg-white p-6 rounded-[2rem] border-2 border-slate-100 min-h-[250px]">
-                                <h3 class="text-[10px] font-black uppercase text-red-500 mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-minus"></i> Eliminar (Negativo)</h3>
-                                <textarea id="miro-eliminar" class="w-full h-32 bg-transparent border-none focus:ring-0 text-xs" placeholder="¿Qué procesos o hábitos debemos quitar?"></textarea>
+                            <div class="bg-white p-6 rounded-[2.5rem] border-2 border-slate-100 shadow-sm">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-[10px] font-black uppercase text-red-500 italic"><i class="fa-solid fa-circle-minus mr-1"></i> Eliminar (Negativo)</h3>
+                                    <button onclick="toggleRecArea('eliminar')" id="btn-rec-eliminar" class="rec-mini bg-red-50 text-red-500"><i class="fa-solid fa-microphone"></i> Rec</button>
+                                </div>
+                                <textarea id="miro-eliminar" class="w-full h-32 bg-transparent border-none focus:ring-0 text-xs" placeholder="¿Qué procesos debemos quitar?"></textarea>
                             </div>
 
-                            <div class="bg-white p-6 rounded-[2rem] border-2 border-slate-100 min-h-[250px]">
-                                <h3 class="text-[10px] font-black uppercase text-blue-500 mb-4 flex items-center gap-2"><i class="fa-solid fa-arrows-rotate"></i> Cambiar / Mejorar</h3>
-                                <textarea id="miro-cambiar" class="w-full h-32 bg-transparent border-none focus:ring-0 text-xs" placeholder="¿Qué necesita evolucionar?"></textarea>
+                            <div class="bg-white p-6 rounded-[2.5rem] border-2 border-slate-100 shadow-sm text-right">
+                                <div class="flex justify-between items-center mb-4 flex-row-reverse">
+                                    <h3 class="text-[10px] font-black uppercase text-blue-500 italic">Cambiar / Mejorar <i class="fa-solid fa-arrows-rotate ml-1"></i></h3>
+                                    <button onclick="toggleRecArea('cambiar')" id="btn-rec-cambiar" class="rec-mini bg-blue-50 text-blue-500"><i class="fa-solid fa-microphone"></i> Rec</button>
+                                </div>
+                                <textarea id="miro-cambiar" class="w-full h-32 bg-transparent border-none focus:ring-0 text-xs text-right" placeholder="¿Qué debe evolucionar?"></textarea>
                             </div>
 
-                            <div class="bg-white p-6 rounded-[2rem] border-2 border-slate-100 min-h-[250px] mt-4">
-                                <h3 class="text-[10px] font-black uppercase text-emerald-500 mb-4 flex items-center gap-2"><i class="fa-solid fa-plus-circle"></i> Crear (Positivo)</h3>
-                                <textarea id="miro-crear" class="w-full h-32 bg-transparent border-none focus:ring-0 text-xs" placeholder="Nuevas iniciativas o ideas..."></textarea>
+                            <div class="bg-white p-6 rounded-[2.5rem] border-2 border-slate-100 shadow-sm mt-8">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-[10px] font-black uppercase text-emerald-500 italic"><i class="fa-solid fa-plus-circle mr-1"></i> Crear (Positivo)</h3>
+                                    <button onclick="toggleRecArea('crear')" id="btn-rec-crear" class="rec-mini bg-emerald-50 text-emerald-500"><i class="fa-solid fa-microphone"></i> Rec</button>
+                                </div>
+                                <textarea id="miro-crear" class="w-full h-32 bg-transparent border-none focus:ring-0 text-xs" placeholder="Nuevas iniciativas..."></textarea>
                             </div>
 
-                            <div class="bg-white p-6 rounded-[2rem] border-2 border-slate-100 min-h-[250px] mt-4">
-                                <h3 class="text-[10px] font-black uppercase text-orange-500 mb-4 flex items-center gap-2"><i class="fa-solid fa-shield-heart"></i> Mantener / Defender</h3>
-                                <textarea id="miro-mantener" class="w-full h-32 bg-transparent border-none focus:ring-0 text-xs" placeholder="¿Qué está funcionando perfectamente?"></textarea>
+                            <div class="bg-white p-6 rounded-[2.5rem] border-2 border-slate-100 shadow-sm mt-8 text-right">
+                                <div class="flex justify-between items-center mb-4 flex-row-reverse">
+                                    <h3 class="text-[10px] font-black uppercase text-orange-500 italic">Mantener / Defender <i class="fa-solid fa-shield-heart ml-1"></i></h3>
+                                    <button onclick="toggleRecArea('mantener')" id="btn-rec-mantener" class="rec-mini bg-orange-50 text-orange-500"><i class="fa-solid fa-microphone"></i> Rec</button>
+                                </div>
+                                <textarea id="miro-mantener" class="w-full h-32 bg-transparent border-none focus:ring-0 text-xs text-right" placeholder="Lo que funciona perfectamente..."></textarea>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-6 mt-6">
-                            <div class="bg-brand-yellow/10 p-6 rounded-[2rem] border-2 border-brand-yellow/20">
-                                <h3 class="text-[10px] font-black uppercase text-brand-purple mb-4">Aceptar (Realidad Actual)</h3>
-                                <textarea id="miro-aceptar" class="w-full h-24 bg-transparent border-none focus:ring-0 text-xs" placeholder="Limitaciones que debemos asumir..."></textarea>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="bg-white p-6 rounded-[2rem] border shadow-sm">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="text-[10px] font-black uppercase opacity-40">Aceptar (Realidad)</h3>
+                                    <button onclick="toggleRecArea('aceptar')" id="btn-rec-aceptar" class="rec-mini bg-slate-100 text-slate-400"><i class="fa-solid fa-microphone"></i> Rec</button>
+                                </div>
+                                <textarea id="miro-aceptar" class="w-full h-20 bg-transparent border-none focus:ring-0 text-xs" placeholder="Limitaciones actuales..."></textarea>
                             </div>
-                            <div class="bg-brand-purple text-white p-6 rounded-[2rem]">
-                                <h3 class="text-[10px] font-black uppercase text-brand-yellow mb-4 italic">Cierre / Expectativa</h3>
-                                <textarea id="miro-cierre" class="w-full h-24 bg-transparent border-none focus:ring-0 text-xs text-white" placeholder="Frase final o aprendizaje de la sesión..."></textarea>
+                            <div class="bg-brand-purple p-6 rounded-[2rem] text-white">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="text-[10px] font-black uppercase text-brand-yellow italic">Cierre / Expectativa</h3>
+                                    <button onclick="toggleRecArea('cierre')" id="btn-rec-cierre" class="rec-mini bg-white/10 text-brand-yellow"><i class="fa-solid fa-microphone"></i> Rec</button>
+                                </div>
+                                <textarea id="miro-cierre" class="w-full h-20 bg-transparent border-none focus:ring-0 text-xs" placeholder="Aprendizaje final de la sesión..."></textarea>
                             </div>
                         </div>
 
-                        <button onclick="guardarEntrevista()" class="w-full bg-brand-yellow text-brand-purple py-5 rounded-[2rem] font-black uppercase text-xs shadow-xl hover:scale-[1.01] transition-all">Guardar Diagnóstico Completo</button>
+                        <button onclick="guardarEntrevista()" class="w-full bg-brand-yellow text-brand-purple py-5 rounded-[2.5rem] font-black uppercase text-xs shadow-xl">Guardar Diagnóstico Completo</button>
                     </div>
                 </section>
 
                 <section id="sec-excel" class="content-sec hidden">
-                    <div class="bg-white p-12 rounded-[3rem] border text-center max-w-xl mx-auto">
+                    <div class="bg-white p-12 rounded-[3rem] border text-center max-w-xl mx-auto shadow-sm">
                         <h2 class="text-xl font-black text-brand-purple mb-4 uppercase italic">Cargar Excel</h2>
                         <input type="file" id="excel-input" class="hidden" accept=".xlsx, .xls">
                         <button onclick="document.getElementById('excel-input').click()" class="bg-brand-purple text-brand-yellow px-12 py-4 rounded-2xl font-black uppercase text-xs">Seleccionar Archivo</button>
@@ -153,6 +176,7 @@
 
         let mediaRecorder;
         let audioChunks = [];
+        let currentRecId = null;
 
         async function loginConGoogle() {
             await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
@@ -192,7 +216,35 @@
 
         async function cargarAutorizados() {
             const { data } = await sb.from('usuarios_autorizados').select('email');
-            document.getElementById('lista-autorizados').innerHTML = data.map(u => `<div class="p-3 bg-slate-50 rounded-xl border flex justify-between"><span>${u.email}</span></div>`).join('');
+            document.getElementById('lista-autorizados').innerHTML = data.map(u => `<div class="p-3 bg-slate-50 rounded-xl border"><span>${u.email}</span></div>`).join('');
+        }
+
+        // Lógica de grabación por área
+        async function toggleRecArea(id) {
+            const btn = document.getElementById(`btn-rec-${id}`);
+            
+            if (currentRecId === null) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `nota_${id}_${Date.now()}.wav`;
+                    a.click();
+                    currentRecId = null;
+                };
+                mediaRecorder.start();
+                currentRecId = id;
+                btn.classList.add('is-recording');
+                btn.innerHTML = '<i class="fa-solid fa-stop"></i> Stop';
+            } else if (currentRecId === id) {
+                mediaRecorder.stop();
+                btn.classList.remove('is-recording');
+                btn.innerHTML = '<i class="fa-solid fa-microphone"></i> Rec';
+            }
         }
 
         async function guardarEntrevista() {
@@ -203,7 +255,6 @@
                 const { data } = await sb.from('empresas').insert([{ nombre: n }]).select().single();
                 empId = data.id;
             }
-
             const payload = {
                 empresa_id: empId,
                 entrevistado: document.getElementById('miro-nombre').value,
@@ -215,29 +266,8 @@
                 cierre: document.getElementById('miro-cierre').value,
                 analisis_central: document.getElementById('miro-analisis-central').value
             };
-
             const { error } = await sb.from('entrevistas').insert([payload]);
-            if(!error) { alert("Diagnóstico guardado con éxito."); showSec('carpetas'); cargarEmpresas(); }
-        }
-
-        async function toggleRecording() {
-            const btn = document.getElementById('record-btn');
-            if (!mediaRecorder || mediaRecorder.state === "inactive") {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(audioChunks, { type: 'audio/wav' });
-                    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-                    a.download = `audio_${Date.now()}.wav`; a.click();
-                };
-                mediaRecorder.start();
-                btn.innerHTML = 'Detener'; btn.classList.replace('bg-red-500', 'bg-black');
-            } else {
-                mediaRecorder.stop();
-                btn.innerHTML = 'Grabar Audio'; btn.classList.replace('bg-black', 'bg-red-500');
-            }
+            if(!error) { alert("Guardado con éxito."); showSec('carpetas'); cargarEmpresas(); }
         }
 
         async function cerrarSesion() { await sb.auth.signOut(); window.location.reload(); }
