@@ -23,21 +23,29 @@
 <body class="bg-slate-50 min-h-screen">
 
     <div id="login-overlay" class="fixed inset-0 bg-brand-purple z-[100] flex flex-col items-center justify-center text-center p-6">
-        <div class="w-32 h-32 bg-brand-yellow rounded-full flex items-center justify-center mb-8 border-4 border-white shadow-2xl overflow-hidden">
-            <span class="text-4xl font-black text-brand-purple italic tracking-tighter">RW</span>
+        <div class="mb-8">
+            <img src="https://raw.githubusercontent.com/annaislopez02/annaislopez02.github.io/main/logo.png" 
+                 alt="Reason Why Logo" 
+                 class="w-48 h-48 md:w-64 md:h-64 object-contain shadow-2xl rounded-full border-4 border-brand-yellow"
+                 onerror="this.style.display='none'">
+            <div id="logo-fallback" class="w-32 h-32 bg-brand-yellow rounded-full flex items-center justify-center border-4 border-white shadow-2xl mx-auto hidden">
+                <span class="text-4xl font-black text-brand-purple italic tracking-tighter">RW</span>
+            </div>
         </div>
+        
         <h2 class="text-white text-3xl font-black uppercase italic mb-2 tracking-tighter">Acceso Restringido</h2>
         <p class="text-brand-yellow/60 text-[10px] font-black uppercase tracking-[0.4em] mb-10">Facilitadores de la Transformación</p>
+        
         <button onclick="loginConGoogle()" class="bg-white text-brand-purple px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl flex items-center gap-4 hover:scale-105 transition-all">
             <img src="https://www.google.com/favicon.ico" class="w-4"> Autenticar con Google Enterprise
         </button>
-        <p id="login-error" class="text-red-400 mt-6 text-[10px] font-black uppercase hidden italic animate-pulse">Acceso denegado</p>
+        <p id="login-error" class="text-red-400 mt-6 text-[10px] font-black uppercase hidden italic animate-pulse">Acceso denegado: Usuario no autorizado</p>
     </div>
 
     <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md sticky top-0 z-50">
         <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple">
-                <span class="font-black text-brand-purple italic text-sm">RW</span>
+            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple overflow-hidden">
+                <img src="https://raw.githubusercontent.com/annaislopez02/annaislopez02.github.io/main/logo.png" class="w-full h-full object-cover">
             </div>
             <h1 class="font-black text-brand-purple uppercase tracking-tighter text-sm">Reason Why <span class="italic font-light text-xs">Enterprise OS</span></h1>
         </div>
@@ -72,15 +80,14 @@
             <section id="sec-chat" class="hidden h-[80vh] flex flex-col">
                 <div class="mb-4 flex justify-between items-center">
                     <h2 class="text-2xl font-black text-brand-purple italic">Consultor IA Inteligente</h2>
-                    <div class="text-[10px] font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full">MODO: ANÁLISIS DE DATOS EXCEL</div>
                 </div>
                 <div id="chat-container" class="flex-1 bg-slate-100 rounded-[2rem] p-6 overflow-y-auto flex flex-col shadow-inner border border-slate-200">
                     <div class="ai-msg chat-bubble">
-                        ¡Hola! Soy tu asistente de Reason Why. Selecciona una empresa en el directorio y sube sus datos para que pueda ayudarte a analizarlos.
+                        ¡Hola! Selecciona una empresa para analizar sus hallazgos.
                     </div>
                 </div>
                 <div class="mt-4 flex gap-2">
-                    <input type="text" id="chat-input" class="flex-1 p-4 rounded-2xl border-2 border-slate-200 outline-none focus:border-brand-yellow" placeholder="Pregúntame sobre los hallazgos de las entrevistas...">
+                    <input type="text" id="chat-input" class="flex-1 p-4 rounded-2xl border-2 border-slate-200 outline-none focus:border-brand-yellow" placeholder="Pregunta sobre las entrevistas...">
                     <button onclick="enviarMensaje()" class="bg-brand-purple text-brand-yellow px-8 py-4 rounded-2xl font-black text-xs uppercase">Preguntar</button>
                 </div>
             </section>
@@ -141,14 +148,23 @@
             const { data } = await sb.from('empresas').select('*');
             const grid = document.getElementById('grid-empresas');
             grid.innerHTML = data.map(e => `
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-transparent hover:border-brand-yellow transition-all group">
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-transparent hover:border-brand-yellow transition-all">
                     <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
                     <h4 class="font-black text-brand-purple text-sm uppercase italic mb-4">${e.nombre}</h4>
-                    <div class="flex gap-2">
-                        <button onclick="alert('Funcionalidad de carga próxima')" class="text-[9px] font-bold bg-brand-purple text-white px-3 py-1 rounded-full uppercase">Subir Excel</button>
+                    <div class="flex flex-col gap-2">
+                         <span class="text-[10px] text-slate-400 uppercase font-bold">Rubro: ${e.rubro || 'N/A'}</span>
+                         <button onclick="alert('Próximamente carga de Excel')" class="mt-2 text-[9px] font-bold bg-brand-purple text-white px-3 py-2 rounded-full uppercase">Cargar Entrevistas</button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        async function crearEmpresa() {
+            const nombre = prompt("Nombre de la Empresa:");
+            if(!nombre) return;
+            const rubro = prompt("Rubro:");
+            await sb.from('empresas').insert([{ nombre, rubro }]);
+            cargarEmpresas();
         }
 
         async function autorizarCorreo() {
@@ -173,6 +189,12 @@
             await sb.auth.signOut();
             window.location.reload();
         }
+
+        // Si la imagen falla, muestra el icono RW por defecto
+        document.querySelector('img').onerror = function() {
+            document.getElementById('logo-fallback').classList.remove('hidden');
+            this.style.display = 'none';
+        };
 
         window.onload = checkUser;
     </script>
