@@ -1,4 +1,4 @@
-<!<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -6,105 +6,36 @@
     <title>Reason Why | Enterprise OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --morado: #302039; --amarillo: #f9db02; }
         .bg-brand-purple { background-color: var(--morado); }
-        .text-brand-purple { color: var(--morado); }
         .bg-brand-yellow { background-color: var(--amarillo); }
-        .nav-btn { transition: all 0.3s; opacity: 0.7; cursor: pointer; border-left: 4px solid transparent; padding: 1rem; border-radius: 0.75rem; font-weight: bold; font-size: 0.75rem; display: flex; align-items: center; gap: 1rem; width: 100%; text-align: left; }
-        .nav-btn:hover, .nav-btn.active-link { opacity: 1; background: rgba(48, 32, 57, 0.05); border-left: 4px solid var(--amarillo); }
-        .chat-bubble { max-width: 80%; padding: 1rem; border-radius: 1.5rem; margin-bottom: 1rem; font-size: 0.85rem; line-height: 1.4; }
-        .user-msg { background: var(--morado); color: white; align-self: flex-end; border-bottom-right-radius: 0.2rem; }
-        .ai-msg { background: white; color: var(--morado); align-self: flex-start; border-bottom-left-radius: 0.2rem; border: 1px solid #e2e8f0; }
+        .text-brand-purple { color: var(--morado); }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
     <div id="login-overlay" class="fixed inset-0 bg-brand-purple z-[100] flex flex-col items-center justify-center text-center p-6">
         <div class="mb-8">
-            <img src="logo.png" 
-                 alt="Reason Why Logo" 
-                 class="w-48 h-48 md:w-64 md:h-64 object-contain shadow-2xl rounded-full border-4 border-brand-yellow"
-                 onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
-            
-            <div id="logo-fallback" class="w-32 h-32 bg-brand-yellow rounded-full flex items-center justify-center border-4 border-white shadow-2xl mx-auto hidden">
-                <span class="text-4xl font-black text-brand-purple italic tracking-tighter">RW</span>
-            </div>
+            <img src="logo.png" alt="Logo" class="w-48 h-48 object-contain shadow-2xl rounded-full border-4 border-brand-yellow" onerror="this.src='https://via.placeholder.com/200?text=RW'">
         </div>
-        
-        <h2 class="text-white text-3xl font-black uppercase italic mb-2 tracking-tighter">Acceso Restringido</h2>
-        <p class="text-brand-yellow/60 text-[10px] font-black uppercase tracking-[0.4em] mb-10">Facilitadores de la Transformación</p>
-        
+        <h2 class="text-white text-3xl font-black uppercase italic mb-10">Acceso Restringido</h2>
         <button onclick="loginConGoogle()" class="bg-white text-brand-purple px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl flex items-center gap-4 hover:scale-105 transition-all">
-            <img src="https://www.google.com/favicon.ico" class="w-4"> Autenticar con Google Enterprise
+            <img src="https://www.google.com/favicon.ico" class="w-4"> Autenticar con Google
         </button>
-        <p id="login-error" class="text-red-400 mt-6 text-[10px] font-black uppercase hidden italic animate-pulse">Acceso denegado: Usuario no autorizado</p>
     </div>
 
-    <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md sticky top-0 z-50">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple overflow-hidden">
-                <img src="logo.png" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/40?text=RW'">
+    <div id="app-content" class="hidden">
+        <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md">
+            <div class="flex items-center gap-4">
+                <img src="logo.png" class="w-10 h-10 rounded-full border-2 border-brand-purple">
+                <h1 class="font-black text-brand-purple uppercase text-sm italic">Reason Why OS</h1>
             </div>
-            <h1 class="font-black text-brand-purple uppercase tracking-tighter text-sm">Reason Why <span class="italic font-light text-xs">Enterprise OS</span></h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <span id="user-email" class="text-[10px] font-bold text-brand-purple opacity-60"></span>
             <button onclick="cerrarSesion()" class="text-[9px] font-black uppercase bg-brand-purple text-brand-yellow px-4 py-1 rounded-full">Salir</button>
-        </div>
-    </header>
-
-    <div class="flex">
-        <aside class="w-64 bg-white border-r min-h-[calc(100vh-64px)] p-6 space-y-2">
-            <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link">
-                <i class="fa-solid fa-folder-tree"></i> DIRECTORIO
-            </button>
-            <button onclick="showSec('chat')" id="link-chat" class="nav-btn">
-                <i class="fa-solid fa-robot"></i> CONSULTOR IA
-            </button>
-            <button onclick="showSec('seguridad')" id="link-seguridad" class="nav-btn text-red-600">
-                <i class="fa-solid fa-shield-halved"></i> SEGURIDAD
-            </button>
-        </aside>
-
-        <main class="flex-1 p-10">
-            <section id="sec-carpetas" class="space-y-6">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-black text-brand-purple italic">Empresas</h2>
-                    <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-3 rounded-2xl font-black text-xs uppercase shadow-lg">+ Nueva Empresa</button>
-                </div>
-                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-            </section>
-
-            <section id="sec-chat" class="hidden h-[80vh] flex flex-col">
-                <div id="chat-container" class="flex-1 bg-slate-100 rounded-[2rem] p-6 overflow-y-auto flex flex-col shadow-inner border border-slate-200">
-                    <div class="ai-msg chat-bubble">Hola Annais, selecciona una empresa para analizar sus datos.</div>
-                </div>
-                <div class="mt-4 flex gap-2">
-                    <input type="text" id="chat-input" class="flex-1 p-4 rounded-2xl border-2 border-slate-200 outline-none text-sm" placeholder="Haz una pregunta...">
-                    <button onclick="enviarMensaje()" class="bg-brand-purple text-brand-yellow px-8 py-4 rounded-2xl font-black text-xs uppercase">Analizar</button>
-                </div>
-            </section>
-
-            <section id="sec-seguridad" class="hidden space-y-6">
-                <div class="bg-white p-10 rounded-[3rem] shadow-sm max-w-2xl mx-auto border border-slate-100">
-                    <h3 class="text-xl font-black text-brand-purple mb-6 italic uppercase">Usuarios Autorizados</h3>
-                    <div class="flex gap-4 mb-8">
-                        <input type="email" id="new-auth-email" class="flex-1 p-4 bg-slate-50 rounded-2xl text-xs border-2 border-slate-100" placeholder="correo@gmail.com">
-                        <button onclick="autorizarCorreo()" class="bg-brand-purple text-brand-yellow px-8 py-4 rounded-2xl font-black text-xs uppercase">Autorizar</button>
-                    </div>
-                    <div class="rounded-2xl border overflow-hidden">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 text-slate-400 font-black">
-                                <tr><th class="p-4">Email</th><th class="p-4 text-right">Acción</th></tr>
-                            </thead>
-                            <tbody id="lista-autorizados"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
+        </header>
+        <main class="p-10">
+            <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </main>
     </div>
 
@@ -114,33 +45,21 @@
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
         async function loginConGoogle() {
+            // Se define explícitamente la URL de retorno para evitar el error de localhost
+            const targetURL = "https://annaislopez02.github.io/reason-why-os/";
             await sb.auth.signInWithOAuth({ 
                 provider: 'google',
-                options: { redirectTo: window.location.href }
+                options: { redirectTo: targetURL }
             });
         }
 
         async function checkUser() {
             const { data: { user } } = await sb.auth.getUser();
             if (user) {
-                const { data: auth } = await sb.from('usuarios_autorizados').select('*').eq('email', user.email).single();
-                if (auth) {
-                    document.getElementById('login-overlay').classList.add('hidden');
-                    document.getElementById('user-email').innerText = user.email;
-                    cargarEmpresas();
-                    cargarListaAutorizados();
-                } else {
-                    document.getElementById('login-error').classList.remove('hidden');
-                    setTimeout(() => sb.auth.signOut(), 3000);
-                }
+                document.getElementById('login-overlay').classList.add('hidden');
+                document.getElementById('app-content').classList.remove('hidden');
+                cargarEmpresas();
             }
-        }
-
-        function showSec(id) {
-            document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`sec-${id}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link'));
-            document.getElementById(`link-${id}`).classList.add('active-link');
         }
 
         async function cargarEmpresas() {
@@ -148,46 +67,17 @@
             const grid = document.getElementById('grid-empresas');
             grid.innerHTML = data.map(e => `
                 <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-transparent hover:border-brand-yellow transition-all">
-                    <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
-                    <h4 class="font-black text-brand-purple text-sm uppercase italic mb-2">${e.nombre}</h4>
-                    <p class="text-[10px] text-slate-400 font-bold mb-4 uppercase">Rubro: ${e.rubro || 'General'}</p>
+                    <h4 class="font-black text-brand-purple text-sm uppercase italic">${e.nombre}</h4>
                 </div>
-            `).join('');
-        }
-
-        async function crearEmpresa() {
-            const nombre = prompt("Nombre de la Empresa:");
-            if(!nombre) return;
-            const rubro = prompt("Rubro:");
-            await sb.from('empresas').insert([{ nombre, rubro }]);
-            cargarEmpresas();
-        }
-
-        async function autorizarCorreo() {
-            const email = document.getElementById('new-auth-email').value;
-            if(!email) return;
-            await sb.from('usuarios_autorizados').insert([{ email, rol: 'consultor' }]);
-            cargarListaAutorizados();
-            document.getElementById('new-auth-email').value = '';
-        }
-
-        async function cargarListaAutorizados() {
-            const { data } = await sb.from('usuarios_autorizados').select('*');
-            document.getElementById('lista-autorizados').innerHTML = data.map(u => `
-                <tr class="border-t">
-                    <td class="p-4 font-bold text-brand-purple">${u.email}</td>
-                    <td class="p-4 text-right"><button class="text-red-400 font-black text-[9px] uppercase">Eliminar</button></td>
-                </tr>
             `).join('');
         }
 
         async function cerrarSesion() {
             await sb.auth.signOut();
-            window.location.reload();
+            window.location.href = "https://annaislopez02.github.io/reason-why-os/";
         }
 
         window.onload = checkUser;
     </script>
 </body>
 </html>
-
