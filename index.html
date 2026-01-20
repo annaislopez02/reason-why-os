@@ -6,214 +6,176 @@
     <title>Reason Why | Enterprise OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
         :root { --morado: #302039; --amarillo: #f9db02; }
         .bg-brand-purple { background-color: var(--morado); }
         .text-brand-purple { color: var(--morado); }
         .bg-brand-yellow { background-color: var(--amarillo); }
-        .nav-btn { transition: all 0.3s; border-left: 4px solid transparent; cursor: pointer; opacity: 0.7; }
+        .nav-btn { transition: all 0.3s; opacity: 0.7; cursor: pointer; border-left: 4px solid transparent; padding: 1rem; border-radius: 0.75rem; font-weight: bold; font-size: 0.75rem; display: flex; align-items: center; gap: 1rem; width: 100%; text-align: left; }
         .nav-btn:hover, .nav-btn.active-link { opacity: 1; background: rgba(48, 32, 57, 0.05); border-left: 4px solid var(--amarillo); }
-        .input-focus { border: 2px solid transparent; transition: all 0.3s; }
-        .input-focus:focus { border-color: var(--amarillo); outline: none; background: white; }
-        .animate-fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .chat-bubble { max-width: 80%; padding: 1rem; border-radius: 1.5rem; margin-bottom: 1rem; font-size: 0.85rem; line-height: 1.4; }
+        .user-msg { background: var(--morado); color: white; align-self: flex-end; border-bottom-right-radius: 0.2rem; }
+        .ai-msg { background: white; color: var(--morado); align-self: flex-start; border-bottom-left-radius: 0.2rem; border: 1px solid #e2e8f0; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen font-sans">
+<body class="bg-slate-50 min-h-screen">
+
+    <div id="login-overlay" class="fixed inset-0 bg-brand-purple z-[100] flex flex-col items-center justify-center text-center p-6">
+        <div class="w-32 h-32 bg-brand-yellow rounded-full flex items-center justify-center mb-8 border-4 border-white shadow-2xl overflow-hidden">
+            <span class="text-4xl font-black text-brand-purple italic tracking-tighter">RW</span>
+        </div>
+        <h2 class="text-white text-3xl font-black uppercase italic mb-2 tracking-tighter">Acceso Restringido</h2>
+        <p class="text-brand-yellow/60 text-[10px] font-black uppercase tracking-[0.4em] mb-10">Facilitadores de la Transformación</p>
+        <button onclick="loginConGoogle()" class="bg-white text-brand-purple px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl flex items-center gap-4 hover:scale-105 transition-all">
+            <img src="https://www.google.com/favicon.ico" class="w-4"> Autenticar con Google Enterprise
+        </button>
+        <p id="login-error" class="text-red-400 mt-6 text-[10px] font-black uppercase hidden italic animate-pulse">Acceso denegado</p>
+    </div>
 
     <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md sticky top-0 z-50">
         <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple overflow-hidden">
-                <span class="font-black text-brand-purple italic">RW</span>
+            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple">
+                <span class="font-black text-brand-purple italic text-sm">RW</span>
             </div>
-            <h1 class="font-black text-brand-purple uppercase tracking-tighter">Reason Why <span class="font-light italic">Enterprise</span></h1>
+            <h1 class="font-black text-brand-purple uppercase tracking-tighter text-sm">Reason Why <span class="italic font-light text-xs">Enterprise OS</span></h1>
         </div>
-        <div class="text-[10px] font-black uppercase italic bg-brand-purple text-brand-yellow px-4 py-1 rounded-full">Facilitadores de la Transformación</div>
+        <div class="flex items-center gap-4">
+            <span id="user-email" class="text-[10px] font-bold text-brand-purple opacity-60"></span>
+            <button onclick="cerrarSesion()" class="text-[9px] font-black uppercase bg-brand-purple text-brand-yellow px-4 py-1 rounded-full">Salir</button>
+        </div>
     </header>
 
     <div class="flex">
-        <aside class="w-64 bg-white border-r min-h-[calc(100vh-64px)] p-6 sticky top-16">
-            <nav class="space-y-2">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Módulos de Gestión</p>
-                <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
-                    <i class="fa-solid fa-folder-tree"></i> DIRECTORIO
-                </button>
-                <button onclick="showSec('entrevistas')" id="link-entrevistas" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
-                    <i class="fa-solid fa-microphone-lines"></i> ENTREVISTAS MIRO
-                </button>
-                <button onclick="showSec('excel')" id="link-excel" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
-                    <i class="fa-solid fa-file-excel"></i> CARGA EXCEL RAG
-                </button>
-                <button onclick="showSec('dashboard')" id="link-dashboard" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
-                    <i class="fa-solid fa-chart-line"></i> DASHBOARD CLÍNICA
-                </button>
-                
-                <div id="active-client-box" class="mt-10 p-4 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 hidden">
-                    <p class="text-[9px] font-black text-slate-400 uppercase">Empresa Activa:</p>
-                    <p id="active-client-name" class="text-xs font-bold text-brand-purple truncate">Ninguna</p>
-                </div>
-            </nav>
+        <aside class="w-64 bg-white border-r min-h-[calc(100vh-64px)] p-6 space-y-2">
+            <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link">
+                <i class="fa-solid fa-folder-tree"></i> DIRECTORIO
+            </button>
+            <button onclick="showSec('chat')" id="link-chat" class="nav-btn">
+                <i class="fa-solid fa-robot"></i> CONSULTOR IA
+            </button>
+            <button onclick="showSec('seguridad')" id="link-seguridad" class="nav-btn text-red-600">
+                <i class="fa-solid fa-shield-halved"></i> SEGURIDAD
+            </button>
         </aside>
 
-        <main class="flex-1 p-10 overflow-y-auto">
-            
+        <main class="flex-1 p-10">
             <section id="sec-carpetas" class="space-y-6">
                 <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-black text-brand-purple italic">Directorio de Empresas</h2>
-                    <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-3 rounded-2xl font-black text-xs uppercase shadow-lg hover:scale-105 transition-all">+ Nueva Empresa</button>
+                    <h2 class="text-2xl font-black text-brand-purple italic">Empresas</h2>
+                    <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-3 rounded-2xl font-black text-xs uppercase shadow-lg">+ Nueva Empresa</button>
                 </div>
-                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center"></div>
+                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
             </section>
 
-            <section id="sec-excel" class="hidden animate-fade-in">
-                <div class="max-w-2xl mx-auto bg-white p-12 rounded-[3rem] border-4 border-dashed border-slate-200 text-center shadow-sm">
-                    <i class="fa-solid fa-cloud-arrow-up text-6xl text-brand-purple mb-6"></i>
-                    <h3 class="text-xl font-black text-brand-purple mb-2 uppercase italic">Carga de Datos Maestros (RAG)</h3>
-                    <p class="text-xs text-slate-400 mb-8">Sube tu archivo .xlsx para que la IA aprenda sobre esta empresa.</p>
-                    
-                    <input type="file" id="excel-file" class="hidden" accept=".xlsx, .xls">
-                    <button onclick="document.getElementById('excel-file').click()" class="bg-brand-purple text-brand-yellow px-10 py-4 rounded-full font-black text-xs uppercase shadow-lg hover:bg-slate-800 transition-all">
-                        Seleccionar Archivo Excel
-                    </button>
-                    <div id="file-status" class="mt-4 text-[10px] font-bold text-green-600 uppercase"></div>
+            <section id="sec-chat" class="hidden h-[80vh] flex flex-col">
+                <div class="mb-4 flex justify-between items-center">
+                    <h2 class="text-2xl font-black text-brand-purple italic">Consultor IA Inteligente</h2>
+                    <div class="text-[10px] font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full">MODO: ANÁLISIS DE DATOS EXCEL</div>
                 </div>
-            </section>
-
-            <section id="sec-entrevistas" class="hidden space-y-8 animate-fade-in">
-                <h2 class="text-2xl font-black text-brand-purple italic">Framework de Diagnóstico</h2>
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm">
-                    <p class="text-xs text-slate-400 italic">Formulario listo para registro manual vinculado a la empresa activa.</p>
+                <div id="chat-container" class="flex-1 bg-slate-100 rounded-[2rem] p-6 overflow-y-auto flex flex-col shadow-inner border border-slate-200">
+                    <div class="ai-msg chat-bubble">
+                        ¡Hola! Soy tu asistente de Reason Why. Selecciona una empresa en el directorio y sube sus datos para que pueda ayudarte a analizarlos.
+                    </div>
+                </div>
+                <div class="mt-4 flex gap-2">
+                    <input type="text" id="chat-input" class="flex-1 p-4 rounded-2xl border-2 border-slate-200 outline-none focus:border-brand-yellow" placeholder="Pregúntame sobre los hallazgos de las entrevistas...">
+                    <button onclick="enviarMensaje()" class="bg-brand-purple text-brand-yellow px-8 py-4 rounded-2xl font-black text-xs uppercase">Preguntar</button>
                 </div>
             </section>
 
-            <section id="sec-dashboard" class="hidden space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-8 rounded-[3rem] shadow-sm"><canvas id="radarCultural"></canvas></div>
-                    <div class="bg-brand-purple p-8 rounded-[3rem] text-white flex flex-col justify-center text-center">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-brand-yellow">Madurez Actual</span>
-                        <h2 class="text-7xl font-black italic">83%</h2>
-                        <p class="text-[10px] mt-4 opacity-60 italic">"Del compromiso voluntario al estándar corporativo"</p>
+            <section id="sec-seguridad" class="hidden space-y-6">
+                <div class="bg-white p-10 rounded-[3rem] shadow-sm max-w-2xl mx-auto">
+                    <h3 class="text-xl font-black text-brand-purple mb-6 italic uppercase">Usuarios Autorizados</h3>
+                    <div class="flex gap-4 mb-8">
+                        <input type="email" id="new-auth-email" class="flex-1 p-4 bg-slate-50 rounded-2xl text-xs border-2 border-slate-100" placeholder="correo@gmail.com">
+                        <button onclick="autorizarCorreo()" class="bg-brand-purple text-brand-yellow px-8 py-4 rounded-2xl font-black text-xs uppercase">Autorizar</button>
+                    </div>
+                    <div class="rounded-2xl border overflow-hidden">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-400 font-black">
+                                <tr><th class="p-4">Email</th><th class="p-4 text-right">Acción</th></tr>
+                            </thead>
+                            <tbody id="lista-autorizados"></tbody>
+                        </table>
                     </div>
                 </div>
             </section>
-
         </main>
     </div>
 
     <script>
-        // --- CONEXIÓN SUPABASE ---
         const SB_URL = "https://tujifqtjwfycgvsbzihq.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1amlmcXRqd2Z5Y2d2c2J6aWhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MjY0NTcsImV4cCI6MjA4MzQwMjQ1N30.eiUII1HObNgo7X8plbpqmrIfEU-K0giWwqbBxTxjRWE";
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
-        // --- NAVEGACIÓN ---
+        async function loginConGoogle() {
+            await sb.auth.signInWithOAuth({ provider: 'google' });
+        }
+
+        async function checkUser() {
+            const { data: { user } } = await sb.auth.getUser();
+            if (user) {
+                const { data: auth } = await sb.from('usuarios_autorizados').select('*').eq('email', user.email).single();
+                if (auth) {
+                    document.getElementById('login-overlay').classList.add('hidden');
+                    document.getElementById('user-email').innerText = user.email;
+                    cargarEmpresas();
+                    cargarListaAutorizados();
+                } else {
+                    document.getElementById('login-error').classList.remove('hidden');
+                    setTimeout(() => sb.auth.signOut(), 3000);
+                }
+            }
+        }
+
         function showSec(id) {
             document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`sec-${id}`).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link'));
             document.getElementById(`link-${id}`).classList.add('active-link');
-            if(id === 'dashboard') setTimeout(initChart, 200);
         }
 
-        // --- GESTIÓN DE EMPRESAS ---
         async function cargarEmpresas() {
-            const { data, error } = await sb.from('empresas').select('*').order('nombre');
-            if (error) return console.error(error);
-            
+            const { data } = await sb.from('empresas').select('*');
             const grid = document.getElementById('grid-empresas');
             grid.innerHTML = data.map(e => `
-                <div onclick="seleccionarEmpresa('${e.id}', '${e.nombre}')" 
-                     class="bg-white p-8 rounded-[2rem] border-2 border-transparent hover:border-brand-yellow cursor-pointer shadow-sm transition-all group">
-                    <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4 group-hover:scale-110 transition-transform"></i>
-                    <h3 class="font-black text-brand-purple text-xs uppercase">${e.nombre}</h3>
-                    <p class="text-[9px] text-slate-400 mt-2 uppercase font-bold italic">Abrir Ecosistema</p>
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-transparent hover:border-brand-yellow transition-all group">
+                    <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
+                    <h4 class="font-black text-brand-purple text-sm uppercase italic mb-4">${e.nombre}</h4>
+                    <div class="flex gap-2">
+                        <button onclick="alert('Funcionalidad de carga próxima')" class="text-[9px] font-bold bg-brand-purple text-white px-3 py-1 rounded-full uppercase">Subir Excel</button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        async function crearEmpresa() {
-            const n = prompt("Nombre de la clínica/empresa:");
-            if(n) { 
-                await sb.from('empresas').insert([{nombre: n}]); 
-                cargarEmpresas(); 
-            }
+        async function autorizarCorreo() {
+            const email = document.getElementById('new-auth-email').value;
+            if(!email) return;
+            await sb.from('usuarios_autorizados').insert([{ email, rol: 'consultor' }]);
+            cargarListaAutorizados();
+            document.getElementById('new-auth-email').value = '';
         }
 
-        function seleccionarEmpresa(id, nombre) {
-            localStorage.setItem('cliente_id', id);
-            localStorage.setItem('cliente_nombre', nombre);
-            document.getElementById('active-client-box').classList.remove('hidden');
-            document.getElementById('active-client-name').innerText = nombre;
-            alert("Carpeta Activa: " + nombre);
-            showSec('excel'); // Al seleccionar, lo llevamos directo a cargar datos
+        async function cargarListaAutorizados() {
+            const { data } = await sb.from('usuarios_autorizados').select('*');
+            document.getElementById('lista-autorizados').innerHTML = data.map(u => `
+                <tr class="border-t">
+                    <td class="p-4 font-bold text-brand-purple">${u.email}</td>
+                    <td class="p-4 text-right"><button class="text-red-400">Eliminar</button></td>
+                </tr>
+            `).join('');
         }
 
-        // --- LÓGICA DE EXCEL (PROCESAMIENTO RAG) ---
-        document.getElementById('excel-file').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const clienteId = localStorage.getItem('cliente_id');
-
-            if (!clienteId) {
-                alert("⚠ Error: Selecciona primero una empresa en el Directorio.");
-                this.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet);
-                
-                procesarDatosRAG(json, clienteId);
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        async function procesarDatosRAG(datos, clienteId) {
-            document.getElementById('file-status').innerText = "Procesando " + datos.length + " filas...";
-            
-            // Insertamos los datos en la tabla de entrevistas para alimentar la IA
-            const { error } = await sb.from('entrevistas').insert(
-                datos.map(fila => ({
-                    empresa_id: clienteId,
-                    contenido_original: JSON.stringify(fila),
-                    metadata: { fuente: 'Excel Upload', fecha: new Date().toISOString() }
-                }))
-            );
-
-            if (error) {
-                alert("Error al inyectar datos: " + error.message);
-            } else {
-                document.getElementById('file-status').innerText = "¡Sincronización Exitosa!";
-                setTimeout(() => showSec('dashboard'), 1500);
-            }
+        async function cerrarSesion() {
+            await sb.auth.signOut();
+            window.location.reload();
         }
 
-        // --- DASHBOARD (Radar Chart) ---
-        function initChart() {
-            const ctx = document.getElementById('radarCultural').getContext('2d');
-            new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Propósito', 'Liderazgo', 'Procesos', 'Aprendizaje', 'Adopción', 'Innovación'],
-                    datasets: [{
-                        label: 'Madurez Organizacional',
-                        data: [85, 80, 82, 88, 83, 85],
-                        borderColor: '#302039',
-                        backgroundColor: 'rgba(48, 32, 57, 0.2)',
-                        borderWidth: 3
-                    }]
-                }
-            });
-        }
-
-        window.onload = cargarEmpresas;
+        window.onload = checkUser;
     </script>
 </body>
 </html>
+
