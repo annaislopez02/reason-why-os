@@ -7,7 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         :root { --morado: #302039; --amarillo: #f9db02; }
         .bg-brand-purple { background-color: var(--morado); }
@@ -17,18 +19,20 @@
         .nav-btn:hover, .nav-btn.active-link { opacity: 1; background: rgba(48, 32, 57, 0.05); border-left: 4px solid var(--amarillo); }
         .input-focus { border: 2px solid transparent; transition: all 0.3s; }
         .input-focus:focus { border-color: var(--amarillo); outline: none; background: white; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans">
 
     <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md sticky top-0 z-50">
         <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple">
+            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple overflow-hidden">
                 <span class="font-black text-brand-purple italic">RW</span>
             </div>
             <h1 class="font-black text-brand-purple uppercase tracking-tighter">Reason Why <span class="font-light italic">Enterprise</span></h1>
         </div>
-        <div class="text-[10px] font-black uppercase italic bg-brand-purple text-brand-yellow px-4 py-1 rounded-full">Sistema Abierto - Consultoría Live</div>
+        <div class="text-[10px] font-black uppercase italic bg-brand-purple text-brand-yellow px-4 py-1 rounded-full">Facilitadores de la Transformación</div>
     </header>
 
     <div class="flex">
@@ -47,6 +51,11 @@
                 <button onclick="showSec('dashboard')" id="link-dashboard" class="nav-btn w-full text-left p-4 rounded-xl font-bold text-xs flex items-center gap-4">
                     <i class="fa-solid fa-chart-line"></i> DASHBOARD CLÍNICA
                 </button>
+                
+                <div id="active-client-box" class="mt-10 p-4 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 hidden">
+                    <p class="text-[9px] font-black text-slate-400 uppercase">Empresa Activa:</p>
+                    <p id="active-client-name" class="text-xs font-bold text-brand-purple truncate">Ninguna</p>
+                </div>
             </nav>
         </aside>
 
@@ -55,78 +64,29 @@
             <section id="sec-carpetas" class="space-y-6">
                 <div class="flex justify-between items-center mb-8">
                     <h2 class="text-2xl font-black text-brand-purple italic">Directorio de Empresas</h2>
-                    <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-3 rounded-2xl font-black text-xs uppercase shadow-lg">+ Nueva Empresa</button>
+                    <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-3 rounded-2xl font-black text-xs uppercase shadow-lg hover:scale-105 transition-all">+ Nueva Empresa</button>
                 </div>
-                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-            </section>
-
-            <section id="sec-entrevistas" class="hidden space-y-8 animate-fade-in">
-                <h2 class="text-2xl font-black text-brand-purple italic">Framework de Diagnóstico Situacional</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-8 rounded-[2.5rem] shadow-sm">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase">Nombre del Entrevistado</label>
-                        <input type="text" id="ent-nombre" class="w-full p-4 bg-slate-50 rounded-xl text-xs input-focus" placeholder="Nombre completo">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase">Cargo</label>
-                        <input type="text" id="ent-cargo" class="w-full p-4 bg-slate-50 rounded-xl text-xs input-focus" placeholder="Cargo u oficio">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase">Entrevistador</label>
-                        <input type="text" id="ent-facilita" class="w-full p-4 bg-slate-50 rounded-xl text-xs input-focus" placeholder="Consultor a cargo">
-                    </div>
-                    <div class="md:col-span-3 space-y-2 mt-4">
-                        <label class="text-[10px] font-black text-slate-400 uppercase italic">Inicio: Contexto del Trabajo (¿Qué hace en su día a día?)</label>
-                        <textarea id="ent-inicio" class="w-full h-24 p-4 bg-slate-50 rounded-xl text-xs input-focus" placeholder="Describe brevemente sus funciones y dolores iniciales..."></textarea>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-brand-yellow">
-                        <h4 class="font-black text-xs uppercase italic mb-4">⚡ CAMBIAR / ELIMINAR</h4>
-                        <textarea id="m-cambiar" class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs input-focus"></textarea>
-                    </div>
-                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-green-400">
-                        <h4 class="font-black text-xs uppercase italic mb-4">🚀 CREAR / INNOVAR</h4>
-                        <textarea id="m-crear" class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs input-focus"></textarea>
-                    </div>
-                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-blue-400">
-                        <h4 class="font-black text-xs uppercase italic mb-4">🛡️ DEFENDER / MANTENER</h4>
-                        <textarea id="m-defender" class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs input-focus"></textarea>
-                    </div>
-                    <div class="bg-white p-6 rounded-[2rem] border-t-8 border-slate-300">
-                        <h4 class="font-black text-xs uppercase italic mb-4">🤝 ACEPTAR / TOLERAR</h4>
-                        <textarea id="m-aceptar" class="w-full h-32 p-4 bg-slate-50 rounded-2xl text-xs input-focus"></textarea>
-                    </div>
-                </div>
-
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm space-y-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-slate-400 uppercase">Cierre: Conclusión del entrevistado</label>
-                        <textarea id="ent-cierre" class="w-full h-24 p-4 bg-slate-50 rounded-xl text-xs input-focus"></textarea>
-                    </div>
-                    <div class="space-y-4">
-                        <label class="text-[10px] font-black text-slate-400 uppercase">3 Frases Clave del Proceso (VoE)</label>
-                        <input type="text" id="f1" class="w-full p-3 bg-slate-50 rounded-lg text-xs italic border-l-4 border-brand-yellow input-focus" placeholder="Frase 1...">
-                        <input type="text" id="f2" class="w-full p-3 bg-slate-50 rounded-lg text-xs italic border-l-4 border-brand-yellow input-focus" placeholder="Frase 2...">
-                        <input type="text" id="f3" class="w-full p-3 bg-slate-50 rounded-lg text-xs italic border-l-4 border-brand-yellow input-focus" placeholder="Frase 3...">
-                    </div>
-                </div>
-
-                <div class="flex gap-4">
-                    <button onclick="guardarTodo()" class="flex-1 bg-brand-purple text-brand-yellow p-5 rounded-2xl font-black text-xs uppercase shadow-xl hover:scale-105 transition-all">Guardar Entrevista Clínica</button>
-                    <button onclick="generarDiamante()" class="flex-1 bg-[#f9db02] text-brand-purple p-5 rounded-2xl font-black text-xs uppercase shadow-xl hover:scale-105 transition-all">Generar Análisis de Diamante</button>
-                </div>
+                <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center"></div>
             </section>
 
             <section id="sec-excel" class="hidden animate-fade-in">
-                <div class="bg-white p-12 rounded-[3rem] border-4 border-dashed border-slate-200 text-center">
+                <div class="max-w-2xl mx-auto bg-white p-12 rounded-[3rem] border-4 border-dashed border-slate-200 text-center shadow-sm">
                     <i class="fa-solid fa-cloud-arrow-up text-6xl text-brand-purple mb-6"></i>
-                    <h3 class="text-xl font-black text-brand-purple mb-2 uppercase">Carga de Datos Maestros</h3>
-                    <p class="text-xs text-slate-400 mb-8">Sube tu archivo .xlsx para procesar métricas de la clínica</p>
-                    <input type="file" id="excel-file" class="hidden">
-                    <button onclick="document.getElementById('excel-file').click()" class="bg-brand-purple text-brand-yellow px-10 py-4 rounded-full font-black text-xs uppercase shadow-lg">Explorar Archivos</button>
+                    <h3 class="text-xl font-black text-brand-purple mb-2 uppercase italic">Carga de Datos Maestros (RAG)</h3>
+                    <p class="text-xs text-slate-400 mb-8">Sube tu archivo .xlsx para que la IA aprenda sobre esta empresa.</p>
+                    
+                    <input type="file" id="excel-file" class="hidden" accept=".xlsx, .xls">
+                    <button onclick="document.getElementById('excel-file').click()" class="bg-brand-purple text-brand-yellow px-10 py-4 rounded-full font-black text-xs uppercase shadow-lg hover:bg-slate-800 transition-all">
+                        Seleccionar Archivo Excel
+                    </button>
+                    <div id="file-status" class="mt-4 text-[10px] font-bold text-green-600 uppercase"></div>
+                </div>
+            </section>
+
+            <section id="sec-entrevistas" class="hidden space-y-8 animate-fade-in">
+                <h2 class="text-2xl font-black text-brand-purple italic">Framework de Diagnóstico</h2>
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm">
+                    <p class="text-xs text-slate-400 italic">Formulario listo para registro manual vinculado a la empresa activa.</p>
                 </div>
             </section>
 
@@ -144,26 +104,13 @@
         </main>
     </div>
 
-    <div id="modal-diamante" class="fixed inset-0 bg-brand-purple/90 z-[60] hidden flex items-center justify-center p-10 backdrop-blur-md">
-        <div class="bg-white w-full max-w-5xl rounded-[3rem] p-10 relative overflow-y-auto max-h-[90vh]">
-            <button onclick="closeDiamante()" class="absolute top-8 right-8 text-2xl"><i class="fa-solid fa-circle-xmark"></i></button>
-            <h3 class="text-2xl font-black text-brand-purple italic mb-8 uppercase text-center">Modelo de Diamante (Diagnóstico Organizacional)</h3>
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div class="bg-slate-50 p-6 rounded-3xl border-b-4 border-brand-yellow"><h5 class="font-black text-[10px] mb-4">ESTRATEGIA</h5><p id="d1" class="text-[11px] italic text-slate-600">Procesando...</p></div>
-                <div class="bg-slate-50 p-6 rounded-3xl border-b-4 border-brand-yellow"><h5 class="font-black text-[10px] mb-4">ESTRUCTURA</h5><p id="d2" class="text-[11px] italic text-slate-600">Procesando...</p></div>
-                <div class="bg-slate-50 p-6 rounded-3xl border-b-4 border-brand-yellow"><h5 class="font-black text-[10px] mb-4">PROCESOS</h5><p id="d3" class="text-[11px] italic text-slate-600">Procesando...</p></div>
-                <div class="bg-slate-50 p-6 rounded-3xl border-b-4 border-brand-yellow"><h5 class="font-black text-[10px] mb-4">RECOMPENSAS</h5><p id="d4" class="text-[11px] italic text-slate-600">Procesando...</p></div>
-                <div class="bg-slate-50 p-6 rounded-3xl border-b-4 border-brand-yellow"><h5 class="font-black text-[10px] mb-4">PERSONAS</h5><p id="d5" class="text-[11px] italic text-slate-600">Procesando...</p></div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // CONFIGURACIÓN SUPABASE
+        // --- CONEXIÓN SUPABASE ---
         const SB_URL = "https://tujifqtjwfycgvsbzihq.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1amlmcXRqd2Z5Y2d2c2J6aWhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MjY0NTcsImV4cCI6MjA4MzQwMjQ1N30.eiUII1HObNgo7X8plbpqmrIfEU-K0giWwqbBxTxjRWE";
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
+        // --- NAVEGACIÓN ---
         function showSec(id) {
             document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`sec-${id}`).classList.remove('hidden');
@@ -172,33 +119,83 @@
             if(id === 'dashboard') setTimeout(initChart, 200);
         }
 
+        // --- GESTIÓN DE EMPRESAS ---
         async function cargarEmpresas() {
-            const { data } = await sb.from('empresas').select('*').order('nombre');
-            document.getElementById('grid-empresas').innerHTML = data.map(e => `
-                <div class="bg-white p-8 rounded-[2rem] border-2 border-transparent hover:border-brand-yellow cursor-pointer shadow-sm transition-all text-center">
-                    <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
+            const { data, error } = await sb.from('empresas').select('*').order('nombre');
+            if (error) return console.error(error);
+            
+            const grid = document.getElementById('grid-empresas');
+            grid.innerHTML = data.map(e => `
+                <div onclick="seleccionarEmpresa('${e.id}', '${e.nombre}')" 
+                     class="bg-white p-8 rounded-[2rem] border-2 border-transparent hover:border-brand-yellow cursor-pointer shadow-sm transition-all group">
+                    <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4 group-hover:scale-110 transition-transform"></i>
                     <h3 class="font-black text-brand-purple text-xs uppercase">${e.nombre}</h3>
+                    <p class="text-[9px] text-slate-400 mt-2 uppercase font-bold italic">Abrir Ecosistema</p>
                 </div>
             `).join('');
         }
 
         async function crearEmpresa() {
             const n = prompt("Nombre de la clínica/empresa:");
-            if(n) { await sb.from('empresas').insert([{nombre: n}]); cargarEmpresas(); }
+            if(n) { 
+                await sb.from('empresas').insert([{nombre: n}]); 
+                cargarEmpresas(); 
+            }
         }
 
-        function generarDiamante() {
-            document.getElementById('modal-diamante').classList.remove('hidden');
-            // Simulación de lógica IA basada en los campos llenos
-            document.getElementById('d1').innerText = "Alineación del propósito con los objetivos quirúrgicos detectados.";
-            document.getElementById('d2').innerText = "Necesidad de jerarquías más planas en el pabellón.";
-            document.getElementById('d3').innerText = "Optimización de tiempos muertos entre cirugías.";
-            document.getElementById('d4').innerText = "Reconocimiento no monetario por cumplimiento de estándares Lean.";
-            document.getElementById('d5').innerText = "Capacitación en habilidades blandas para estamento médico.";
+        function seleccionarEmpresa(id, nombre) {
+            localStorage.setItem('cliente_id', id);
+            localStorage.setItem('cliente_nombre', nombre);
+            document.getElementById('active-client-box').classList.remove('hidden');
+            document.getElementById('active-client-name').innerText = nombre;
+            alert("Carpeta Activa: " + nombre);
+            showSec('excel'); // Al seleccionar, lo llevamos directo a cargar datos
         }
 
-        function closeDiamante() { document.getElementById('modal-diamante').classList.add('hidden'); }
+        // --- LÓGICA DE EXCEL (PROCESAMIENTO RAG) ---
+        document.getElementById('excel-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const clienteId = localStorage.getItem('cliente_id');
 
+            if (!clienteId) {
+                alert("⚠ Error: Selecciona primero una empresa en el Directorio.");
+                this.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet);
+                
+                procesarDatosRAG(json, clienteId);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        async function procesarDatosRAG(datos, clienteId) {
+            document.getElementById('file-status').innerText = "Procesando " + datos.length + " filas...";
+            
+            // Insertamos los datos en la tabla de entrevistas para alimentar la IA
+            const { error } = await sb.from('entrevistas').insert(
+                datos.map(fila => ({
+                    empresa_id: clienteId,
+                    contenido_original: JSON.stringify(fila),
+                    metadata: { fuente: 'Excel Upload', fecha: new Date().toISOString() }
+                }))
+            );
+
+            if (error) {
+                alert("Error al inyectar datos: " + error.message);
+            } else {
+                document.getElementById('file-status').innerText = "¡Sincronización Exitosa!";
+                setTimeout(() => showSec('dashboard'), 1500);
+            }
+        }
+
+        // --- DASHBOARD (Radar Chart) ---
         function initChart() {
             const ctx = document.getElementById('radarCultural').getContext('2d');
             new Chart(ctx, {
@@ -206,15 +203,11 @@
                 data: {
                     labels: ['Propósito', 'Liderazgo', 'Procesos', 'Aprendizaje', 'Adopción', 'Innovación'],
                     datasets: [{
-                        label: 'Junio 2025 (67%)',
-                        data: [65, 59, 60, 70, 66, 67],
-                        borderColor: '#f9db02',
-                        backgroundColor: 'rgba(249, 219, 2, 0.2)'
-                    }, {
-                        label: 'Enero 2026 (83%)',
+                        label: 'Madurez Organizacional',
                         data: [85, 80, 82, 88, 83, 85],
                         borderColor: '#302039',
-                        backgroundColor: 'rgba(48, 32, 57, 0.2)'
+                        backgroundColor: 'rgba(48, 32, 57, 0.2)',
+                        borderWidth: 3
                     }]
                 }
             });
