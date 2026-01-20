@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -79,17 +79,11 @@
             </section>
 
             <section id="sec-chat" class="hidden h-[80vh] flex flex-col">
-                <div class="mb-4 flex justify-between items-center">
-                    <h2 class="text-2xl font-black text-brand-purple italic tracking-tighter uppercase text-sm">Consultor IA</h2>
-                    <span class="text-[10px] font-bold text-slate-400">ANÁLISIS DE ENTREVISTAS</span>
-                </div>
                 <div id="chat-container" class="flex-1 bg-slate-100 rounded-[2rem] p-6 overflow-y-auto flex flex-col shadow-inner border border-slate-200">
-                    <div class="ai-msg chat-bubble">
-                        Hola Annais, selecciona una empresa en el directorio para comenzar el análisis de hallazgos.
-                    </div>
+                    <div class="ai-msg chat-bubble">Hola Annais, selecciona una empresa para analizar sus datos.</div>
                 </div>
                 <div class="mt-4 flex gap-2">
-                    <input type="text" id="chat-input" class="flex-1 p-4 rounded-2xl border-2 border-slate-200 outline-none focus:border-brand-yellow text-sm" placeholder="Haz una pregunta sobre los datos...">
+                    <input type="text" id="chat-input" class="flex-1 p-4 rounded-2xl border-2 border-slate-200 outline-none text-sm" placeholder="Haz una pregunta...">
                     <button onclick="enviarMensaje()" class="bg-brand-purple text-brand-yellow px-8 py-4 rounded-2xl font-black text-xs uppercase">Analizar</button>
                 </div>
             </section>
@@ -122,7 +116,7 @@
         async function loginConGoogle() {
             await sb.auth.signInWithOAuth({ 
                 provider: 'google',
-                options: { redirectTo: window.location.origin + window.location.pathname }
+                options: { redirectTo: window.location.href }
             });
         }
 
@@ -156,8 +150,7 @@
                 <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-transparent hover:border-brand-yellow transition-all">
                     <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
                     <h4 class="font-black text-brand-purple text-sm uppercase italic mb-2">${e.nombre}</h4>
-                    <p class="text-[10px] text-slate-400 font-bold mb-4 uppercase tracking-tighter">Rubro: ${e.rubro || 'No definido'}</p>
-                    <button onclick="alert('Funcionalidad de carga próxima')" class="w-full text-[9px] font-bold bg-brand-purple text-white px-3 py-2 rounded-full uppercase hover:bg-opacity-90">Ver Repositorio</button>
+                    <p class="text-[10px] text-slate-400 font-bold mb-4 uppercase">Rubro: ${e.rubro || 'General'}</p>
                 </div>
             `).join('');
         }
@@ -183,7 +176,7 @@
             document.getElementById('lista-autorizados').innerHTML = data.map(u => `
                 <tr class="border-t">
                     <td class="p-4 font-bold text-brand-purple">${u.email}</td>
-                    <td class="p-4 text-right"><button class="text-red-400 font-black uppercase text-[9px]">Eliminar</button></td>
+                    <td class="p-4 text-right"><button class="text-red-400 font-black text-[9px] uppercase">Eliminar</button></td>
                 </tr>
             `).join('');
         }
@@ -197,5 +190,4 @@
     </script>
 </body>
 </html>
-
 
