@@ -13,19 +13,18 @@
         .bg-brand-purple { background-color: var(--morado); }
         .text-brand-purple { color: var(--morado); }
         .bg-brand-yellow { background-color: var(--amarillo); }
-        .nav-btn { transition: all 0.3s; opacity: 0.7; cursor: pointer; border-left: 4px solid transparent; padding: 1rem; border-radius: 0.75rem; font-weight: bold; font-size: 0.75rem; display: flex; align-items: center; gap: 1rem; width: 100%; text-align: left; }
+        .nav-btn { transition: all 0.3s; opacity: 0.6; cursor: pointer; border-left: 4px solid transparent; padding: 0.8rem 1.5rem; font-weight: bold; font-size: 0.7rem; display: flex; align-items: center; gap: 0.8rem; width: 100%; text-align: left; color: var(--morado); text-transform: uppercase; }
         .nav-btn:hover, .nav-btn.active-link { opacity: 1; background: rgba(48, 32, 57, 0.05); border-left: 4px solid var(--amarillo); }
-        .form-input { width: 100%; padding: 0.75rem; border-radius: 1rem; border: 2px solid #f1f5f9; outline: none; transition: border-color 0.3s; font-size: 0.8rem; }
-        .form-input:focus { border-color: var(--amarillo); }
+        .form-input { width: 100%; padding: 0.8rem; border-radius: 1rem; border: 2px solid #f1f5f9; outline: none; font-size: 0.8rem; background: #fafbfc; }
+        .form-input:focus { border-color: var(--amarillo); background: white; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
     <div id="login-overlay" class="fixed inset-0 bg-brand-purple z-[100] flex flex-col items-center justify-center text-center p-6">
-        <div class="mb-8"><img src="logo.png" alt="Logo" class="w-48 h-48 object-contain shadow-2xl rounded-full border-4 border-brand-yellow"></div>
-        <h2 class="text-white text-3xl font-black uppercase italic mb-10">Acceso Restringido</h2>
+        <div class="mb-8"><img src="logo.png" alt="Logo" class="w-48 h-48 object-contain rounded-full border-4 border-brand-yellow"></div>
         <button onclick="loginConGoogle()" class="bg-white text-brand-purple px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl flex items-center gap-4">
-            <img src="https://www.google.com/favicon.ico" class="w-4"> Entrar con Google
+            <img src="https://www.google.com/favicon.ico" class="w-4"> Entrar con Google Enterprise
         </button>
     </div>
 
@@ -35,82 +34,81 @@
                 <img src="logo.png" class="w-10 h-10 rounded-full border-2 border-brand-purple">
                 <h1 class="font-black text-brand-purple uppercase text-sm italic">REASON WHY OS</h1>
             </div>
-            <button onclick="cerrarSesion()" class="text-[10px] font-black uppercase bg-brand-purple text-brand-yellow px-6 py-2 rounded-full">Salir</button>
+            <button onclick="cerrarSesion()" class="text-[9px] font-black uppercase bg-brand-purple text-brand-yellow px-4 py-2 rounded-full">Salir</button>
         </header>
 
         <div class="flex">
-            <aside class="w-64 bg-white border-r min-h-[calc(100vh-64px)] p-6 space-y-2">
-                <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link"><i class="fa-solid fa-folder"></i> DIRECTORIO</button>
-                <button onclick="showSec('entrevista')" id="link-entrevista" class="nav-btn"><i class="fa-solid fa-microphone"></i> NUEVA ENTREVISTA</button>
-                <button onclick="showSec('excel')" id="link-excel" class="nav-btn"><i class="fa-solid fa-file-excel"></i> CARGAR EXCEL</button>
-                <button onclick="showSec('analisis')" id="link-analisis" class="nav-btn"><i class="fa-solid fa-brain"></i> ANÁLISIS IA</button>
-                <button onclick="showSec('seguridad')" id="link-seguridad" class="nav-btn text-red-600"><i class="fa-solid fa-lock"></i> SEGURIDAD</button>
+            <aside class="w-64 bg-white border-r min-h-[calc(100vh-64px)] py-6 space-y-1">
+                <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link"><i class="fa-solid fa-folder"></i> Directorio</button>
+                <button onclick="showSec('entrevista')" id="link-entrevista" class="nav-btn"><i class="fa-solid fa-microphone"></i> Nueva Entrevista</button>
+                <button onclick="showSec('excel')" id="link-excel" class="nav-btn"><i class="fa-solid fa-file-excel"></i> Cargar Excel</button>
+                <button onclick="showSec('analisis')" id="link-analisis" class="nav-btn"><i class="fa-solid fa-robot"></i> Análisis IA</button>
+                <button onclick="showSec('seguridad')" id="link-seguridad" class="nav-btn text-red-500"><i class="fa-solid fa-shield-halved"></i> Seguridad</button>
             </aside>
 
             <main class="flex-1 p-10">
-                <section id="sec-carpetas" class="space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-black text-brand-purple uppercase italic">Directorio de Empresas</h2>
-                        <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-2 rounded-xl font-black text-[10px] uppercase">+ Empresa</button>
+                <section id="sec-carpetas" class="content-sec">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-black text-brand-purple uppercase italic">Empresas</h2>
+                        <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-2 rounded-xl font-black text-[10px] uppercase">+ Nueva Empresa</button>
                     </div>
                     <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
                 </section>
 
-                <section id="sec-entrevista" class="hidden space-y-6">
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border max-w-4xl mx-auto">
-                        <div class="flex justify-between items-center mb-8">
-                            <h2 class="text-xl font-black text-brand-purple uppercase italic">Nueva Entrevista Miro</h2>
-                            <button id="record-btn" onclick="toggleRecording()" class="bg-red-500 text-white px-6 py-2 rounded-full font-black text-[10px] uppercase flex items-center gap-2">
-                                <i class="fa-solid fa-circle"></i> GRABAR VOZ
+                <section id="sec-entrevista" class="content-sec hidden">
+                    <div class="bg-white p-8 rounded-[2rem] border shadow-sm max-w-4xl mx-auto">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-black text-brand-purple uppercase italic">Formulario de Entrevista Miro</h2>
+                            <button id="record-btn" onclick="toggleRecording()" class="bg-red-500 text-white px-5 py-2 rounded-full font-black text-[10px] uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-microphone"></i> Grabar Audio
                             </button>
                         </div>
-                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="space-y-4">
-                                <label class="text-[10px] font-black uppercase opacity-50">Empresa Destino</label>
+                                <label class="text-[9px] font-black uppercase opacity-40 ml-2">Seleccionar Empresa / Carpeta</label>
                                 <select id="entrevista-empresa" class="form-input"></select>
-                                <input type="text" id="entrevista-nombre" class="form-input" placeholder="Nombre del Entrevistado">
-                                <textarea id="miro-contexto" class="form-input h-24" placeholder="Contexto Actual"></textarea>
-                                <textarea id="miro-desafios" class="form-input h-24" placeholder="Desafíos Identificados"></textarea>
+                                <input type="text" id="miro-nombre" class="form-input" placeholder="Nombre del Entrevistado">
+                                <textarea id="miro-contexto" class="form-input h-28" placeholder="Contexto Actual y Antecedentes"></textarea>
+                                <textarea id="miro-desafios" class="form-input h-28" placeholder="Desafíos y Bloqueos"></textarea>
                             </div>
                             <div class="space-y-4">
-                                <textarea id="miro-oportunidades" class="form-input h-24" placeholder="Oportunidades"></textarea>
-                                <textarea id="miro-dolores" class="form-input h-24" placeholder="Puntos de Dolor (Pain Points)"></textarea>
-                                <textarea id="miro-vision" class="form-input h-24" placeholder="Visión a Futuro"></textarea>
-                                <button onclick="guardarEntrevista()" class="w-full bg-brand-yellow text-brand-purple py-4 rounded-2xl font-black uppercase text-xs shadow-lg">Guardar en Carpeta</button>
+                                <textarea id="miro-oportunidades" class="form-input h-28" placeholder="Oportunidades Detectadas"></textarea>
+                                <textarea id="miro-dolores" class="form-input h-28" placeholder="Puntos de Dolor (Pain Points)"></textarea>
+                                <textarea id="miro-vision" class="form-input h-28" placeholder="Visión de Éxito a Futuro"></textarea>
+                                <button onclick="guardarEntrevista()" class="w-full bg-brand-yellow text-brand-purple py-4 rounded-2xl font-black uppercase text-xs shadow-lg hover:scale-[1.02] transition-transform">Guardar Entrevista en Carpeta</button>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section id="sec-excel" class="hidden">
-                    <div class="bg-white p-10 rounded-[2.5rem] border text-center max-w-2xl mx-auto">
-                        <i class="fa-solid fa-file-arrow-up text-5xl text-brand-yellow mb-6"></i>
-                        <h2 class="text-xl font-black text-brand-purple mb-4">CARGAR DATOS EXCEL</h2>
-                        <input type="file" id="excel-input" accept=".xlsx, .xls" class="hidden">
-                        <button onclick="document.getElementById('excel-input').click()" class="bg-brand-purple text-brand-yellow px-10 py-4 rounded-2xl font-black uppercase text-xs">Seleccionar Archivo</button>
-                        <p id="excel-status" class="mt-4 text-xs font-bold text-slate-400"></p>
+                <section id="sec-excel" class="content-sec hidden">
+                    <div class="bg-white p-12 rounded-[3rem] border text-center max-w-xl mx-auto">
+                        <div class="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl italic font-black">EX</div>
+                        <h2 class="text-xl font-black text-brand-purple mb-2">Carga Masiva de Datos</h2>
+                        <p class="text-xs text-slate-400 mb-8 font-bold">Sube tus reportes de ventas o hallazgos en formato .xlsx</p>
+                        <input type="file" id="excel-input" class="hidden" accept=".xlsx, .xls">
+                        <button onclick="document.getElementById('excel-input').click()" class="bg-brand-purple text-brand-yellow px-12 py-4 rounded-2xl font-black uppercase text-xs">Seleccionar Archivo</button>
                     </div>
                 </section>
 
-                <section id="sec-analisis" class="hidden flex flex-col h-[75vh]">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-black text-brand-purple uppercase italic tracking-tighter">Analizador Inteligente</h2>
-                        <select id="select-analisis" class="p-2 border rounded-xl text-xs font-bold"></select>
+                <section id="sec-analisis" class="content-sec hidden h-[75vh] flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-black text-brand-purple uppercase italic">Consultor de Hallazgos IA</h2>
+                        <select id="select-recurso" class="p-2 border rounded-xl text-[10px] font-bold uppercase"></select>
                     </div>
-                    <div id="ia-output" class="flex-1 bg-white rounded-[2rem] border p-6 overflow-y-auto text-sm leading-relaxed text-slate-600">
-                        Selecciona un recurso y haz una pregunta estratégica para comenzar el análisis.
+                    <div id="ia-output" class="flex-1 bg-white rounded-[2rem] border p-8 overflow-y-auto text-sm text-slate-600 leading-relaxed shadow-inner">
+                        <p class="italic opacity-50">Elige una entrevista o archivo cargado para comenzar el análisis estratégico...</p>
                     </div>
-                    <div class="mt-4 flex gap-2">
-                        <input type="text" id="ia-prompt" class="flex-1 p-4 rounded-2xl border-2 outline-none" placeholder="¿Cuáles son los 3 hallazgos más críticos?">
-                        <button onclick="ejecutarAnalisis()" class="bg-brand-purple text-brand-yellow px-8 rounded-2xl font-black uppercase text-xs">Preguntar IA</button>
+                    <div class="mt-4 flex gap-3">
+                        <input type="text" id="ia-input" class="flex-1 p-4 rounded-2xl border-2 outline-none focus:border-brand-yellow" placeholder="Ej: ¿Cuáles son las 3 mayores oportunidades de crecimiento?">
+                        <button class="bg-brand-purple text-brand-yellow px-10 rounded-2xl font-black uppercase text-xs">Analizar</button>
                     </div>
                 </section>
 
-                <section id="sec-seguridad" class="hidden">
+                <section id="sec-seguridad" class="content-sec hidden">
                     <div class="bg-white p-8 rounded-[2rem] border max-w-md">
-                        <h2 class="font-black text-brand-purple mb-6 uppercase italic">Accesos Autorizados</h2>
-                        <div id="lista-usuarios" class="space-y-2 text-xs font-bold text-slate-500"></div>
+                        <h2 class="font-black text-brand-purple uppercase mb-6 italic border-b pb-2">Control de Usuarios</h2>
+                        <div id="lista-autorizados" class="space-y-3"></div>
                     </div>
                 </section>
             </main>
@@ -128,7 +126,7 @@
         async function loginConGoogle() {
             await sb.auth.signInWithOAuth({ 
                 provider: 'google',
-                options: { redirectTo: window.location.origin + window.location.pathname }
+                options: { redirectTo: "https://annaislopez02.github.io/reason-why-os/" }
             });
         }
 
@@ -138,12 +136,12 @@
                 document.getElementById('login-overlay').classList.add('hidden');
                 document.getElementById('app-content').classList.remove('hidden');
                 cargarEmpresas();
-                cargarUsuarios();
+                cargarAutorizados();
             }
         }
 
         function showSec(id) {
-            document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.content-sec').forEach(s => s.classList.add('hidden'));
             document.getElementById(`sec-${id}`).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link'));
             document.getElementById(`link-${id}`).classList.add('active-link');
@@ -155,30 +153,30 @@
             const select = document.getElementById('entrevista-empresa');
             
             grid.innerHTML = data.map(e => `
-                <div class="bg-white p-6 rounded-[2rem] border-2 border-transparent hover:border-brand-yellow transition-all shadow-sm">
-                    <i class="fa-solid fa-folder-open text-brand-yellow text-3xl mb-4"></i>
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-transparent hover:border-brand-yellow transition-all cursor-pointer group">
+                    <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-brand-yellow transition-colors">
+                        <i class="fa-solid fa-folder-open text-brand-purple opacity-40"></i>
+                    </div>
                     <h4 class="font-black text-brand-purple text-xs uppercase italic">${e.nombre}</h4>
                 </div>
             `).join('');
 
-            select.innerHTML = '<option value="new">+ Crear nueva empresa</option>' + 
-                data.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
+            select.innerHTML = '<option value="new">+ CREAR NUEVA EMPRESA</option>' + 
+                data.map(e => `<option value="${e.id}">${e.nombre.toUpperCase()}</option>`).join('');
         }
 
         async function guardarEntrevista() {
             let empresaId = document.getElementById('entrevista-empresa').value;
-            const nombreEmpresa = document.getElementById('entrevista-nombre').value;
-
             if (empresaId === 'new') {
-                const nueva = prompt("Nombre de la nueva empresa:");
+                const nueva = prompt("Nombre de la nueva carpeta/empresa:");
                 if(!nueva) return;
                 const { data } = await sb.from('empresas').insert([{ nombre: nueva }]).select().single();
                 empresaId = data.id;
             }
 
-            const entrevista = {
+            const payload = {
                 empresa_id: empresaId,
-                nombre: nombreEmpresa,
+                entrevistado: document.getElementById('miro-nombre').value,
                 contexto: document.getElementById('miro-contexto').value,
                 desafios: document.getElementById('miro-desafios').value,
                 oportunidades: document.getElementById('miro-oportunidades').value,
@@ -186,13 +184,16 @@
                 vision: document.getElementById('miro-vision').value
             };
 
-            await sb.from('entrevistas').insert([entrevista]);
-            alert("Entrevista guardada con éxito en la carpeta.");
-            showSec('carpetas');
-            cargarEmpresas();
+            const { error } = await sb.from('entrevistas').insert([payload]);
+            if(!error) {
+                alert("Entrevista guardada y vinculada a la empresa correctamente.");
+                showSec('carpetas');
+                cargarEmpresas();
+            } else {
+                alert("Error al guardar. Asegúrate de que la tabla 'entrevistas' exista en Supabase.");
+            }
         }
 
-        // --- FUNCIONES DE VOZ ---
         async function toggleRecording() {
             const btn = document.getElementById('record-btn');
             if (!mediaRecorder || mediaRecorder.state === "inactive") {
@@ -205,22 +206,24 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `entrevista_${Date.now()}.wav`;
+                    a.download = `entrevista_audio_${Date.now()}.wav`;
                     a.click();
                 };
                 mediaRecorder.start();
-                btn.innerHTML = '<i class="fa-solid fa-stop"></i> DETENER';
+                btn.innerHTML = '<i class="fa-solid fa-square"></i> Detener y Descargar';
                 btn.classList.replace('bg-red-500', 'bg-black');
             } else {
                 mediaRecorder.stop();
-                btn.innerHTML = '<i class="fa-solid fa-circle"></i> GRABAR VOZ';
+                btn.innerHTML = '<i class="fa-solid fa-microphone"></i> Grabar Audio';
                 btn.classList.replace('bg-black', 'bg-red-500');
             }
         }
 
-        async function cargarUsuarios() {
+        async function cargarAutorizados() {
             const { data } = await sb.from('usuarios_autorizados').select('email');
-            document.getElementById('lista-usuarios').innerHTML = data.map(u => `<div>• ${u.email}</div>`).join('');
+            document.getElementById('lista-autorizados').innerHTML = data.map(u => 
+                `<div class="p-3 bg-slate-50 rounded-xl text-[10px] font-bold text-brand-purple border">${u.email}</div>`
+            ).join('');
         }
 
         async function cerrarSesion() {
