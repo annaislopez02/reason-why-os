@@ -24,10 +24,11 @@
 
     <div id="login-overlay" class="fixed inset-0 bg-brand-purple z-[100] flex flex-col items-center justify-center text-center p-6">
         <div class="mb-8">
-            <img src="https://raw.githubusercontent.com/annaislopez02/annaislopez02.github.io/main/logo.png" 
+            <img src="logo.png" 
                  alt="Reason Why Logo" 
                  class="w-48 h-48 md:w-64 md:h-64 object-contain shadow-2xl rounded-full border-4 border-brand-yellow"
-                 onerror="this.style.display='none'">
+                 onerror="this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
+            
             <div id="logo-fallback" class="w-32 h-32 bg-brand-yellow rounded-full flex items-center justify-center border-4 border-white shadow-2xl mx-auto hidden">
                 <span class="text-4xl font-black text-brand-purple italic tracking-tighter">RW</span>
             </div>
@@ -45,7 +46,7 @@
     <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md sticky top-0 z-50">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-brand-purple overflow-hidden">
-                <img src="https://raw.githubusercontent.com/annaislopez02/annaislopez02.github.io/main/logo.png" class="w-full h-full object-cover">
+                <img src="logo.png" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/40?text=RW'">
             </div>
             <h1 class="font-black text-brand-purple uppercase tracking-tighter text-sm">Reason Why <span class="italic font-light text-xs">Enterprise OS</span></h1>
         </div>
@@ -79,21 +80,22 @@
 
             <section id="sec-chat" class="hidden h-[80vh] flex flex-col">
                 <div class="mb-4 flex justify-between items-center">
-                    <h2 class="text-2xl font-black text-brand-purple italic">Consultor IA Inteligente</h2>
+                    <h2 class="text-2xl font-black text-brand-purple italic tracking-tighter uppercase text-sm">Consultor IA</h2>
+                    <span class="text-[10px] font-bold text-slate-400">ANÁLISIS DE ENTREVISTAS</span>
                 </div>
                 <div id="chat-container" class="flex-1 bg-slate-100 rounded-[2rem] p-6 overflow-y-auto flex flex-col shadow-inner border border-slate-200">
                     <div class="ai-msg chat-bubble">
-                        ¡Hola! Selecciona una empresa para analizar sus hallazgos.
+                        Hola Annais, selecciona una empresa en el directorio para comenzar el análisis de hallazgos.
                     </div>
                 </div>
                 <div class="mt-4 flex gap-2">
-                    <input type="text" id="chat-input" class="flex-1 p-4 rounded-2xl border-2 border-slate-200 outline-none focus:border-brand-yellow" placeholder="Pregunta sobre las entrevistas...">
-                    <button onclick="enviarMensaje()" class="bg-brand-purple text-brand-yellow px-8 py-4 rounded-2xl font-black text-xs uppercase">Preguntar</button>
+                    <input type="text" id="chat-input" class="flex-1 p-4 rounded-2xl border-2 border-slate-200 outline-none focus:border-brand-yellow text-sm" placeholder="Haz una pregunta sobre los datos...">
+                    <button onclick="enviarMensaje()" class="bg-brand-purple text-brand-yellow px-8 py-4 rounded-2xl font-black text-xs uppercase">Analizar</button>
                 </div>
             </section>
 
             <section id="sec-seguridad" class="hidden space-y-6">
-                <div class="bg-white p-10 rounded-[3rem] shadow-sm max-w-2xl mx-auto">
+                <div class="bg-white p-10 rounded-[3rem] shadow-sm max-w-2xl mx-auto border border-slate-100">
                     <h3 class="text-xl font-black text-brand-purple mb-6 italic uppercase">Usuarios Autorizados</h3>
                     <div class="flex gap-4 mb-8">
                         <input type="email" id="new-auth-email" class="flex-1 p-4 bg-slate-50 rounded-2xl text-xs border-2 border-slate-100" placeholder="correo@gmail.com">
@@ -118,7 +120,10 @@
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
         async function loginConGoogle() {
-            await sb.auth.signInWithOAuth({ provider: 'google' });
+            await sb.auth.signInWithOAuth({ 
+                provider: 'google',
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            });
         }
 
         async function checkUser() {
@@ -150,11 +155,9 @@
             grid.innerHTML = data.map(e => `
                 <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-transparent hover:border-brand-yellow transition-all">
                     <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
-                    <h4 class="font-black text-brand-purple text-sm uppercase italic mb-4">${e.nombre}</h4>
-                    <div class="flex flex-col gap-2">
-                         <span class="text-[10px] text-slate-400 uppercase font-bold">Rubro: ${e.rubro || 'N/A'}</span>
-                         <button onclick="alert('Próximamente carga de Excel')" class="mt-2 text-[9px] font-bold bg-brand-purple text-white px-3 py-2 rounded-full uppercase">Cargar Entrevistas</button>
-                    </div>
+                    <h4 class="font-black text-brand-purple text-sm uppercase italic mb-2">${e.nombre}</h4>
+                    <p class="text-[10px] text-slate-400 font-bold mb-4 uppercase tracking-tighter">Rubro: ${e.rubro || 'No definido'}</p>
+                    <button onclick="alert('Funcionalidad de carga próxima')" class="w-full text-[9px] font-bold bg-brand-purple text-white px-3 py-2 rounded-full uppercase hover:bg-opacity-90">Ver Repositorio</button>
                 </div>
             `).join('');
         }
@@ -180,7 +183,7 @@
             document.getElementById('lista-autorizados').innerHTML = data.map(u => `
                 <tr class="border-t">
                     <td class="p-4 font-bold text-brand-purple">${u.email}</td>
-                    <td class="p-4 text-right"><button class="text-red-400">Eliminar</button></td>
+                    <td class="p-4 text-right"><button class="text-red-400 font-black uppercase text-[9px]">Eliminar</button></td>
                 </tr>
             `).join('');
         }
@@ -190,14 +193,9 @@
             window.location.reload();
         }
 
-        // Si la imagen falla, muestra el icono RW por defecto
-        document.querySelector('img').onerror = function() {
-            document.getElementById('logo-fallback').classList.remove('hidden');
-            this.style.display = 'none';
-        };
-
         window.onload = checkUser;
     </script>
 </body>
 </html>
+
 
