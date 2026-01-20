@@ -6,6 +6,7 @@
     <title>Reason Why | Enterprise OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --morado: #302039; --amarillo: #f9db02; }
@@ -14,19 +15,18 @@
         .bg-brand-yellow { background-color: var(--amarillo); }
         .nav-btn { transition: all 0.3s; opacity: 0.7; cursor: pointer; border-left: 4px solid transparent; padding: 1rem; border-radius: 0.75rem; font-weight: bold; font-size: 0.75rem; display: flex; align-items: center; gap: 1rem; width: 100%; text-align: left; }
         .nav-btn:hover, .nav-btn.active-link { opacity: 1; background: rgba(48, 32, 57, 0.05); border-left: 4px solid var(--amarillo); }
+        .form-input { width: 100%; padding: 0.75rem; border-radius: 1rem; border: 2px solid #f1f5f9; outline: none; transition: border-color 0.3s; font-size: 0.8rem; }
+        .form-input:focus { border-color: var(--amarillo); }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
     <div id="login-overlay" class="fixed inset-0 bg-brand-purple z-[100] flex flex-col items-center justify-center text-center p-6">
-        <div class="mb-8">
-            <img src="logo.png" alt="Logo" class="w-48 h-48 object-contain shadow-2xl rounded-full border-4 border-brand-yellow" onerror="this.src='https://via.placeholder.com/200?text=RW'">
-        </div>
-        <h2 class="text-white text-3xl font-black uppercase italic mb-10 tracking-tighter">Acceso Restringido</h2>
-        <button onclick="loginConGoogle()" class="bg-white text-brand-purple px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl flex items-center gap-4 hover:scale-105 transition-all">
-            <img src="https://www.google.com/favicon.ico" class="w-4"> Entrar con Google Enterprise
+        <div class="mb-8"><img src="logo.png" alt="Logo" class="w-48 h-48 object-contain shadow-2xl rounded-full border-4 border-brand-yellow"></div>
+        <h2 class="text-white text-3xl font-black uppercase italic mb-10">Acceso Restringido</h2>
+        <button onclick="loginConGoogle()" class="bg-white text-brand-purple px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl flex items-center gap-4">
+            <img src="https://www.google.com/favicon.ico" class="w-4"> Entrar con Google
         </button>
-        <p id="login-error" class="text-red-400 mt-6 text-[10px] font-black uppercase hidden animate-pulse">Usuario no autorizado</p>
     </div>
 
     <div id="app-content" class="hidden">
@@ -35,50 +35,82 @@
                 <img src="logo.png" class="w-10 h-10 rounded-full border-2 border-brand-purple">
                 <h1 class="font-black text-brand-purple uppercase text-sm italic">REASON WHY OS</h1>
             </div>
-            <button onclick="cerrarSesion()" class="text-[10px] font-black uppercase bg-brand-purple text-brand-yellow px-6 py-2 rounded-full shadow-lg">Salir</button>
+            <button onclick="cerrarSesion()" class="text-[10px] font-black uppercase bg-brand-purple text-brand-yellow px-6 py-2 rounded-full">Salir</button>
         </header>
 
         <div class="flex">
             <aside class="w-64 bg-white border-r min-h-[calc(100vh-64px)] p-6 space-y-2">
-                <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link">
-                    <i class="fa-solid fa-folder-tree"></i> DIRECTORIO
-                </button>
-                <button onclick="showSec('chat')" id="link-chat" class="nav-btn">
-                    <i class="fa-solid fa-robot"></i> CONSULTOR IA
-                </button>
-                <button onclick="showSec('seguridad')" id="link-seguridad" class="nav-btn text-red-600">
-                    <i class="fa-solid fa-shield-halved"></i> SEGURIDAD
-                </button>
+                <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link"><i class="fa-solid fa-folder"></i> DIRECTORIO</button>
+                <button onclick="showSec('entrevista')" id="link-entrevista" class="nav-btn"><i class="fa-solid fa-microphone"></i> NUEVA ENTREVISTA</button>
+                <button onclick="showSec('excel')" id="link-excel" class="nav-btn"><i class="fa-solid fa-file-excel"></i> CARGAR EXCEL</button>
+                <button onclick="showSec('analisis')" id="link-analisis" class="nav-btn"><i class="fa-solid fa-brain"></i> ANÁLISIS IA</button>
+                <button onclick="showSec('seguridad')" id="link-seguridad" class="nav-btn text-red-600"><i class="fa-solid fa-lock"></i> SEGURIDAD</button>
             </aside>
 
             <main class="flex-1 p-10">
-                <section id="sec-carpetas">
-                    <div class="flex justify-between items-center mb-8">
-                        <h2 class="text-2xl font-black text-brand-purple italic uppercase">Empresas</h2>
-                        <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-3 rounded-2xl font-black text-xs uppercase shadow-lg">+ Nueva Empresa</button>
+                <section id="sec-carpetas" class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-black text-brand-purple uppercase italic">Directorio de Empresas</h2>
+                        <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-2 rounded-xl font-black text-[10px] uppercase">+ Empresa</button>
                     </div>
                     <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
                 </section>
 
-                <section id="sec-chat" class="hidden">
-                    <h2 class="text-2xl font-black text-brand-purple italic mb-6">CONSULTOR ESTRATÉGICO</h2>
-                    <div class="bg-white rounded-[2rem] p-6 h-[60vh] border shadow-inner overflow-y-auto mb-4" id="chat-box">
-                        <p class="text-slate-400 italic text-sm">Selecciona una empresa para iniciar el análisis...</p>
+                <section id="sec-entrevista" class="hidden space-y-6">
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border max-w-4xl mx-auto">
+                        <div class="flex justify-between items-center mb-8">
+                            <h2 class="text-xl font-black text-brand-purple uppercase italic">Nueva Entrevista Miro</h2>
+                            <button id="record-btn" onclick="toggleRecording()" class="bg-red-500 text-white px-6 py-2 rounded-full font-black text-[10px] uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-circle"></i> GRABAR VOZ
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-4">
+                                <label class="text-[10px] font-black uppercase opacity-50">Empresa Destino</label>
+                                <select id="entrevista-empresa" class="form-input"></select>
+                                <input type="text" id="entrevista-nombre" class="form-input" placeholder="Nombre del Entrevistado">
+                                <textarea id="miro-contexto" class="form-input h-24" placeholder="Contexto Actual"></textarea>
+                                <textarea id="miro-desafios" class="form-input h-24" placeholder="Desafíos Identificados"></textarea>
+                            </div>
+                            <div class="space-y-4">
+                                <textarea id="miro-oportunidades" class="form-input h-24" placeholder="Oportunidades"></textarea>
+                                <textarea id="miro-dolores" class="form-input h-24" placeholder="Puntos de Dolor (Pain Points)"></textarea>
+                                <textarea id="miro-vision" class="form-input h-24" placeholder="Visión a Futuro"></textarea>
+                                <button onclick="guardarEntrevista()" class="w-full bg-brand-yellow text-brand-purple py-4 rounded-2xl font-black uppercase text-xs shadow-lg">Guardar en Carpeta</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <input type="text" class="flex-1 p-4 rounded-2xl border-2 outline-none" placeholder="Pregunta sobre los hallazgos...">
-                        <button class="bg-brand-purple text-brand-yellow px-8 rounded-2xl font-black uppercase text-xs">Enviar</button>
+                </section>
+
+                <section id="sec-excel" class="hidden">
+                    <div class="bg-white p-10 rounded-[2.5rem] border text-center max-w-2xl mx-auto">
+                        <i class="fa-solid fa-file-arrow-up text-5xl text-brand-yellow mb-6"></i>
+                        <h2 class="text-xl font-black text-brand-purple mb-4">CARGAR DATOS EXCEL</h2>
+                        <input type="file" id="excel-input" accept=".xlsx, .xls" class="hidden">
+                        <button onclick="document.getElementById('excel-input').click()" class="bg-brand-purple text-brand-yellow px-10 py-4 rounded-2xl font-black uppercase text-xs">Seleccionar Archivo</button>
+                        <p id="excel-status" class="mt-4 text-xs font-bold text-slate-400"></p>
+                    </div>
+                </section>
+
+                <section id="sec-analisis" class="hidden flex flex-col h-[75vh]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-black text-brand-purple uppercase italic tracking-tighter">Analizador Inteligente</h2>
+                        <select id="select-analisis" class="p-2 border rounded-xl text-xs font-bold"></select>
+                    </div>
+                    <div id="ia-output" class="flex-1 bg-white rounded-[2rem] border p-6 overflow-y-auto text-sm leading-relaxed text-slate-600">
+                        Selecciona un recurso y haz una pregunta estratégica para comenzar el análisis.
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <input type="text" id="ia-prompt" class="flex-1 p-4 rounded-2xl border-2 outline-none" placeholder="¿Cuáles son los 3 hallazgos más críticos?">
+                        <button onclick="ejecutarAnalisis()" class="bg-brand-purple text-brand-yellow px-8 rounded-2xl font-black uppercase text-xs">Preguntar IA</button>
                     </div>
                 </section>
 
                 <section id="sec-seguridad" class="hidden">
-                    <div class="max-w-xl bg-white p-8 rounded-[2rem] border shadow-sm">
-                        <h2 class="font-black text-brand-purple uppercase italic mb-6">Gestión de Accesos</h2>
-                        <div class="flex gap-2 mb-6">
-                            <input type="email" id="new-auth-email" class="flex-1 p-3 bg-slate-50 rounded-xl border" placeholder="Email a autorizar">
-                            <button onclick="autorizarCorreo()" class="bg-brand-purple text-brand-yellow px-6 rounded-xl font-bold text-xs uppercase">Añadir</button>
-                        </div>
-                        <div id="lista-autorizados" class="text-sm font-bold text-brand-purple opacity-70"></div>
+                    <div class="bg-white p-8 rounded-[2rem] border max-w-md">
+                        <h2 class="font-black text-brand-purple mb-6 uppercase italic">Accesos Autorizados</h2>
+                        <div id="lista-usuarios" class="space-y-2 text-xs font-bold text-slate-500"></div>
                     </div>
                 </section>
             </main>
@@ -90,27 +122,23 @@
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1amlmcXRqd2Z5Y2d2c2J6aWhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MjY0NTcsImV4cCI6MjA4MzQwMjQ1N30.eiUII1HObNgo7X8plbpqmrIfEU-K0giWwqbBxTxjRWE";
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
+        let mediaRecorder;
+        let audioChunks = [];
+
         async function loginConGoogle() {
             await sb.auth.signInWithOAuth({ 
                 provider: 'google',
-                options: { redirectTo: "https://annaislopez02.github.io/reason-why-os/" }
+                options: { redirectTo: window.location.origin + window.location.pathname }
             });
         }
 
         async function checkUser() {
             const { data: { user } } = await sb.auth.getUser();
             if (user) {
-                // Verificación de seguridad
-                const { data: auth } = await sb.from('usuarios_autorizados').select('*').eq('email', user.email).single();
-                if (auth) {
-                    document.getElementById('login-overlay').classList.add('hidden');
-                    document.getElementById('app-content').classList.remove('hidden');
-                    cargarEmpresas();
-                    cargarAutorizados();
-                } else {
-                    document.getElementById('login-error').classList.remove('hidden');
-                    setTimeout(() => sb.auth.signOut(), 3000);
-                }
+                document.getElementById('login-overlay').classList.add('hidden');
+                document.getElementById('app-content').classList.remove('hidden');
+                cargarEmpresas();
+                cargarUsuarios();
             }
         }
 
@@ -124,22 +152,75 @@
         async function cargarEmpresas() {
             const { data } = await sb.from('empresas').select('*');
             const grid = document.getElementById('grid-empresas');
+            const select = document.getElementById('entrevista-empresa');
+            
             grid.innerHTML = data.map(e => `
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-transparent hover:border-brand-yellow transition-all cursor-pointer">
-                    <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
-                    <h4 class="font-black text-brand-purple text-sm uppercase italic">${e.nombre}</h4>
+                <div class="bg-white p-6 rounded-[2rem] border-2 border-transparent hover:border-brand-yellow transition-all shadow-sm">
+                    <i class="fa-solid fa-folder-open text-brand-yellow text-3xl mb-4"></i>
+                    <h4 class="font-black text-brand-purple text-xs uppercase italic">${e.nombre}</h4>
                 </div>
             `).join('');
+
+            select.innerHTML = '<option value="new">+ Crear nueva empresa</option>' + 
+                data.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
         }
 
-        async function cargarAutorizados() {
+        async function guardarEntrevista() {
+            let empresaId = document.getElementById('entrevista-empresa').value;
+            const nombreEmpresa = document.getElementById('entrevista-nombre').value;
+
+            if (empresaId === 'new') {
+                const nueva = prompt("Nombre de la nueva empresa:");
+                if(!nueva) return;
+                const { data } = await sb.from('empresas').insert([{ nombre: nueva }]).select().single();
+                empresaId = data.id;
+            }
+
+            const entrevista = {
+                empresa_id: empresaId,
+                nombre: nombreEmpresa,
+                contexto: document.getElementById('miro-contexto').value,
+                desafios: document.getElementById('miro-desafios').value,
+                oportunidades: document.getElementById('miro-oportunidades').value,
+                dolores: document.getElementById('miro-dolores').value,
+                vision: document.getElementById('miro-vision').value
+            };
+
+            await sb.from('entrevistas').insert([entrevista]);
+            alert("Entrevista guardada con éxito en la carpeta.");
+            showSec('carpetas');
+            cargarEmpresas();
+        }
+
+        // --- FUNCIONES DE VOZ ---
+        async function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+            if (!mediaRecorder || mediaRecorder.state === "inactive") {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `entrevista_${Date.now()}.wav`;
+                    a.click();
+                };
+                mediaRecorder.start();
+                btn.innerHTML = '<i class="fa-solid fa-stop"></i> DETENER';
+                btn.classList.replace('bg-red-500', 'bg-black');
+            } else {
+                mediaRecorder.stop();
+                btn.innerHTML = '<i class="fa-solid fa-circle"></i> GRABAR VOZ';
+                btn.classList.replace('bg-black', 'bg-red-500');
+            }
+        }
+
+        async function cargarUsuarios() {
             const { data } = await sb.from('usuarios_autorizados').select('email');
-            document.getElementById('lista-autorizados').innerHTML = data.map(u => `<div>• ${u.email}</div>`).join('');
-        }
-
-        async function crearEmpresa() {
-            const nombre = prompt("Nombre de la empresa:");
-            if(nombre) { await sb.from('empresas').insert([{ nombre }]); cargarEmpresas(); }
+            document.getElementById('lista-usuarios').innerHTML = data.map(u => `<div>• ${u.email}</div>`).join('');
         }
 
         async function cerrarSesion() {
