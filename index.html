@@ -10,33 +10,83 @@
     <style>
         :root { --morado: #302039; --amarillo: #f9db02; }
         .bg-brand-purple { background-color: var(--morado); }
-        .bg-brand-yellow { background-color: var(--amarillo); }
         .text-brand-purple { color: var(--morado); }
+        .bg-brand-yellow { background-color: var(--amarillo); }
+        .nav-btn { transition: all 0.3s; opacity: 0.7; cursor: pointer; border-left: 4px solid transparent; padding: 1rem; border-radius: 0.75rem; font-weight: bold; font-size: 0.75rem; display: flex; align-items: center; gap: 1rem; width: 100%; text-align: left; }
+        .nav-btn:hover, .nav-btn.active-link { opacity: 1; background: rgba(48, 32, 57, 0.05); border-left: 4px solid var(--amarillo); }
+        .chat-bubble { max-width: 80%; padding: 1rem; border-radius: 1.5rem; margin-bottom: 1rem; font-size: 0.85rem; line-height: 1.4; }
+        .user-msg { background: var(--morado); color: white; align-self: flex-end; border-bottom-right-radius: 0.2rem; }
+        .ai-msg { background: white; color: var(--morado); align-self: flex-start; border-bottom-left-radius: 0.2rem; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
     <div id="login-overlay" class="fixed inset-0 bg-brand-purple z-[100] flex flex-col items-center justify-center text-center p-6">
         <div class="mb-8">
-            <img src="logo.png" alt="Logo" class="w-48 h-48 object-contain shadow-2xl rounded-full border-4 border-brand-yellow" onerror="this.src='https://via.placeholder.com/200?text=RW'">
+            <img src="logo.png" alt="Logo" class="w-48 h-48 object-contain shadow-2xl rounded-full border-4 border-brand-yellow">
         </div>
         <h2 class="text-white text-3xl font-black uppercase italic mb-10">Acceso Restringido</h2>
         <button onclick="loginConGoogle()" class="bg-white text-brand-purple px-10 py-4 rounded-full font-black text-xs uppercase shadow-xl flex items-center gap-4 hover:scale-105 transition-all">
-            <img src="https://www.google.com/favicon.ico" class="w-4"> Autenticar con Google
+            <img src="https://www.google.com/favicon.ico" class="w-4"> Autenticar con Google Enterprise
         </button>
     </div>
 
     <div id="app-content" class="hidden">
-        <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md">
+        <header class="bg-brand-yellow p-3 px-8 flex items-center justify-between shadow-md sticky top-0 z-50">
             <div class="flex items-center gap-4">
                 <img src="logo.png" class="w-10 h-10 rounded-full border-2 border-brand-purple">
-                <h1 class="font-black text-brand-purple uppercase text-sm italic">Reason Why OS</h1>
+                <h1 class="font-black text-brand-purple uppercase tracking-tighter text-sm">Reason Why <span class="italic font-light text-xs">Enterprise OS</span></h1>
             </div>
-            <button onclick="cerrarSesion()" class="text-[9px] font-black uppercase bg-brand-purple text-brand-yellow px-4 py-1 rounded-full">Salir</button>
+            <div class="flex items-center gap-4">
+                <span id="user-email" class="text-[10px] font-bold text-brand-purple opacity-60"></span>
+                <button onclick="cerrarSesion()" class="text-[9px] font-black uppercase bg-brand-purple text-brand-yellow px-4 py-1 rounded-full">Salir</button>
+            </div>
         </header>
-        <main class="p-10">
-            <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-        </main>
+
+        <div class="flex">
+            <aside class="w-64 bg-white border-r min-h-[calc(100vh-64px)] p-6 space-y-2">
+                <button onclick="showSec('carpetas')" id="link-carpetas" class="nav-btn active-link">
+                    <i class="fa-solid fa-folder-tree"></i> DIRECTORIO
+                </button>
+                <button onclick="showSec('chat')" id="link-chat" class="nav-btn">
+                    <i class="fa-solid fa-robot"></i> CONSULTOR IA
+                </button>
+                <button onclick="showSec('seguridad')" id="link-seguridad" class="nav-btn text-red-600">
+                    <i class="fa-solid fa-shield-halved"></i> SEGURIDAD
+                </button>
+            </aside>
+
+            <main class="flex-1 p-10">
+                <section id="sec-carpetas">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-black text-brand-purple italic uppercase">Empresas</h2>
+                        <button onclick="crearEmpresa()" class="bg-brand-purple text-brand-yellow px-6 py-3 rounded-2xl font-black text-xs uppercase shadow-lg">+ Nueva Empresa</button>
+                    </div>
+                    <div id="grid-empresas" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+                </section>
+
+                <section id="sec-chat" class="hidden h-[80vh] flex flex-col">
+                    <div id="chat-container" class="flex-1 bg-slate-100 rounded-[2rem] p-6 overflow-y-auto flex flex-col shadow-inner border border-slate-200">
+                        <div class="ai-msg chat-bubble">Hola, selecciona una empresa en el Directorio para comenzar el análisis.</div>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <input type="text" id="chat-input" class="flex-1 p-4 rounded-2xl border-2 border-slate-200 outline-none text-sm" placeholder="Escribe tu consulta estratégica...">
+                        <button onclick="enviarMensaje()" class="bg-brand-purple text-brand-yellow px-8 py-4 rounded-2xl font-black text-xs uppercase">Analizar</button>
+                    </div>
+                </section>
+
+                <section id="sec-seguridad" class="hidden">
+                    <div class="bg-white p-10 rounded-[3rem] shadow-sm max-w-2xl mx-auto border border-slate-100">
+                        <h3 class="text-xl font-black text-brand-purple mb-6 italic uppercase">Control de Usuarios</h3>
+                        <div class="flex gap-4 mb-8">
+                            <input type="email" id="new-auth-email" class="flex-1 p-4 bg-slate-50 rounded-2xl text-xs border-2 border-slate-100" placeholder="correo@ejemplo.com">
+                            <button onclick="autorizarCorreo()" class="bg-brand-purple text-brand-yellow px-8 py-4 rounded-2xl font-black text-xs uppercase">Autorizar</button>
+                        </div>
+                        <div id="lista-autorizados" class="space-y-2"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
 
     <script>
@@ -45,11 +95,9 @@
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
         async function loginConGoogle() {
-            // Se define explícitamente la URL de retorno para evitar el error de localhost
-            const targetURL = "https://annaislopez02.github.io/reason-why-os/";
-            await sb.auth.signInWithOAuth({ 
+            const { error } = await sb.auth.signInWithOAuth({ 
                 provider: 'google',
-                options: { redirectTo: targetURL }
+                options: { redirectTo: window.location.origin + window.location.pathname }
             });
         }
 
@@ -58,23 +106,40 @@
             if (user) {
                 document.getElementById('login-overlay').classList.add('hidden');
                 document.getElementById('app-content').classList.remove('hidden');
+                document.getElementById('user-email').innerText = user.email;
                 cargarEmpresas();
             }
+        }
+
+        function showSec(id) {
+            document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`sec-${id}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-link'));
+            document.getElementById(`link-${id}`).classList.add('active-link');
         }
 
         async function cargarEmpresas() {
             const { data } = await sb.from('empresas').select('*');
             const grid = document.getElementById('grid-empresas');
             grid.innerHTML = data.map(e => `
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-transparent hover:border-brand-yellow transition-all">
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border-2 border-transparent hover:border-brand-yellow transition-all cursor-pointer">
+                    <i class="fa-solid fa-folder text-brand-yellow text-4xl mb-4"></i>
                     <h4 class="font-black text-brand-purple text-sm uppercase italic">${e.nombre}</h4>
                 </div>
             `).join('');
         }
 
+        async function crearEmpresa() {
+            const nombre = prompt("Nombre de la nueva empresa:");
+            if(nombre) {
+                await sb.from('empresas').insert([{ nombre }]);
+                cargarEmpresas();
+            }
+        }
+
         async function cerrarSesion() {
             await sb.auth.signOut();
-            window.location.href = "https://annaislopez02.github.io/reason-why-os/";
+            window.location.reload();
         }
 
         window.onload = checkUser;
